@@ -1,8 +1,7 @@
 SQLDll.opensdf
 SQLDll.sdf
 SQLDll.suo
-SQLDll/SQLDll.vcxproj.filters
-SQLDll/SQLDll.vcxproj.user
 SQLDll/SQLDll/Debug
 SQLDLL/ipch/
 SQLDll/Debug/
+SQLDll/Test/Debug
