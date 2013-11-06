@@ -1,0 +1,29 @@
+
+void DisplayTitles(HSTMT     hStmt,
+                   DWORD     cDisplaySize,
+                   BINDING   *pBinding)
+{
+    WCHAR           wszTitle[DISPLAY_MAX];
+    SQLSMALLINT     iCol = 1;
+
+    SetConsole(cDisplaySize+2, TRUE);
+
+    for (; pBinding; pBinding = pBinding->sNext)
+    {
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLColAttribute(hStmt,
+                    iCol++,
+                    SQL_DESC_NAME,
+                    wszTitle,
+                    sizeof(wszTitle), // Note count of bytes!
+                    NULL,
+                    NULL));
+
+        wprintf(DISPLAY_FORMAT_C,
+                 PIPE,
+                 pBinding->cDisplaySize,
+                 pBinding->cDisplaySize,
+                 wszTitle);
+    }
+}

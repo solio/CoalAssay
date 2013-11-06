@@ -19,11 +19,15 @@
 /*      HandleError         Show ODBC error messages
 /******************************************************************************/
 
-
 #include "OdbcSample.h"
+#include "Windows.h"
 
-int OdbcSample(int argc, WCHAR **argv)
+SHORT   gHeight = 80;       // Users screen height
+
+int OdbcSample()
 {
+	int argc = 0;
+	WCHAR **argv = NULL;
     SQLHENV     hEnv = NULL;
     SQLHDBC     hDbc = NULL;
     SQLHSTMT    hStmt = NULL;
@@ -34,7 +38,7 @@ int OdbcSample(int argc, WCHAR **argv)
 
     if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hEnv) == SQL_ERROR)
     {
-        fwprintf(stderr, L"Unable to allocate an environment handle\n");
+        fwprintf(stderr, _T("Unable to allocate an environment handle\n"));
         exit(-1);
     }
 
@@ -74,6 +78,7 @@ int OdbcSample(int argc, WCHAR **argv)
         SQLDriverConnectW(hDbc,
                          GetDesktopWindow(),
                          pwszConnStr,
+						 //strConn,
                          SQL_NTS,
                          NULL,
                          0,
@@ -121,7 +126,7 @@ int OdbcSample(int argc, WCHAR **argv)
 
                 if (sNumResults > 0)
                 {
-                    DisplayResults(hStmt,sNumResults);
+                    DisplayResults(hStmt, sNumResults);
                 } 
                 else
                 {
@@ -316,7 +321,7 @@ void AllocateBindings(HSTMT         hStmt,
 {
     SQLSMALLINT     iCol;
     BINDING         *pThisBinding, *pLastBinding = NULL;
-    SQLLEN          cchDisplay, ssType;
+    SQLLEN          cchDisplay, cchColName, ssType;
     SQLSMALLINT     cchColumnNameLength;
 
     *pDisplay = 0;
@@ -389,7 +394,7 @@ void AllocateBindings(HSTMT         hStmt,
         // Allocate a buffer big enough to hold the text representation
         // of the data.  Add one character for the null terminator
 
-        pThisBinding->wszBuffer = (WCHAR *)malloc((cchDisplay+1) * sizeof(WCHAR));
+        pThisBinding->wszBuffer = (WCHAR *)malloc((cchDisplay+1) * sizeof(WCHAR));		
 
         if (!(pThisBinding->wszBuffer))
         {
@@ -423,6 +428,18 @@ void AllocateBindings(HSTMT         hStmt,
                     SQL_DESC_NAME,
                     NULL,
                     0,
+                    &cchColumnNameLength,
+                    NULL));
+
+		pThisBinding->wszColName = (WCHAR *)malloc((cchColumnNameLength + 1) * sizeof(WCHAR));
+
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLColAttributeW(hStmt,
+                    iCol,
+                    SQL_DESC_NAME,
+					(SQLPOINTER) pThisBinding->wszColName,
+                    (cchColumnNameLength + 1) * sizeof(WCHAR),
                     &cchColumnNameLength,
                     NULL));
 

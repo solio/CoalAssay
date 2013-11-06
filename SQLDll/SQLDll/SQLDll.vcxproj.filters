@@ -15,8 +15,49 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="OdbcDriver.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IDriver.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SqlServerQueryBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SqlServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoalAssayDB.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OdbcDriver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Def.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IDriver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlServerQueryBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoalAssayDB.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

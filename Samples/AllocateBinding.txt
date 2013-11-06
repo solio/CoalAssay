@@ -1,0 +1,96 @@
+void AllocateBindings(HSTMT         hStmt,
+                      SQLSMALLINT   cCols,
+                      BINDING       **ppBinding,
+                      SQLSMALLINT   *pDisplay)
+{
+    SQLSMALLINT     iCol;
+    BINDING         *pThisBinding, *pLastBinding = NULL;
+    SQLLEN          cchDisplay, ssType;
+    SQLSMALLINT     cchColumnNameLength;
+
+    *pDisplay = 0;
+
+    for (iCol = 1; iCol <= cCols; iCol++)
+    {
+        pThisBinding = (BINDING *)(malloc(sizeof(BINDING)));
+        if (!(pThisBinding))
+        {
+            fwprintf(stderr, L"Out of memory!\n");
+            exit(-100);
+        }
+
+        if (iCol == 1)
+        {
+            *ppBinding = pThisBinding;
+        }
+        else
+        {
+            pLastBinding->sNext = pThisBinding;
+        }
+        pLastBinding = pThisBinding;
+		
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLColAttribute(hStmt,
+                    iCol,
+                    SQL_DESC_DISPLAY_SIZE,
+                    NULL,
+                    0,
+                    NULL,
+                    &cchDisplay));
+
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLColAttribute(hStmt,
+                    iCol,
+                    SQL_DESC_CONCISE_TYPE,
+                    NULL,
+                    0,
+                    NULL,
+                    &ssType));
+
+
+        pThisBinding->fChar = (ssType == SQL_CHAR ||
+                                ssType == SQL_VARCHAR ||
+                                ssType == SQL_LONGVARCHAR);
+
+        pThisBinding->sNext = NULL;
+        // Arbitrary limit on display size
+        if (cchDisplay > DISPLAY_MAX)
+            cchDisplay = DISPLAY_MAX;
+
+        pThisBinding->wszBuffer = (WCHAR *)malloc((cchDisplay+1) * sizeof(WCHAR));
+
+        if (!(pThisBinding->wszBuffer))
+        {
+            fwprintf(stderr, L"Out of memory!\n");
+            exit(-100);
+        }
+
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLBindCol(hStmt,
+                    iCol,
+                    SQL_C_TCHAR,
+                    (SQLPOINTER) pThisBinding->wszBuffer,
+                    (cchDisplay + 1) * sizeof(WCHAR),
+                    &pThisBinding->indPtr));
+
+        TRYODBC(hStmt,
+                SQL_HANDLE_STMT,
+                SQLColAttribute(hStmt,
+                    iCol,
+                    SQL_DESC_NAME,
+                    NULL,
+                    0,
+                    &cchColumnNameLength,
+                    NULL));
+
+        pThisBinding->cDisplaySize = max((SQLSMALLINT)cchDisplay, cchColumnNameLength);
+        if (pThisBinding->cDisplaySize < NULL_SIZE)
+            pThisBinding->cDisplaySize = NULL_SIZE;
+
+        *pDisplay += pThisBinding->cDisplaySize + DISPLAY_FORMAT_EXTRA;
+
+    }
+}

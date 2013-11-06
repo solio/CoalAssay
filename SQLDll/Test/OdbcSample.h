@@ -35,6 +35,7 @@
 typedef struct STR_BINDING {
     SQLSMALLINT         cDisplaySize;           /* size to display  */
     WCHAR               *wszBuffer;             /* display buffer   */
+	WCHAR               *wszColName;            /* colname buffer   */
     SQLLEN              indPtr;                 /* size or null     */
     BOOL                fChar;                  /* character col?   */
     struct STR_BINDING  *sNext;                 /* linked list      */
@@ -80,9 +81,7 @@ void SetConsole(DWORD   cDisplaySize,
 
 #define PIPE                L'|'
 
-SHORT   gHeight = 80;       // Users screen height
-
 //int __cdecl wmain(int argc, _In_reads_(argc) WCHAR **argv)
-int OdbcSample(int argc, WCHAR **argv);
+int OdbcSample();
 
 #endif
