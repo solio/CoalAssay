@@ -14,7 +14,7 @@ protected:
 	WCHAR*		m_pcswQueryString;
 	SQLCol*		m_pCols;
 	SQLRow*		m_pRow;
-
+	BOOL		m_bConnected;
 public:
 	OdbcDriver(void);
 	virtual int Connect(LPCWSTR lpszConnectedString);
@@ -31,11 +31,16 @@ public:
 	void HandleDiagnosticRecord (SQLHANDLE hHandle,    
 								 SQLSMALLINT hType,  
 								 RETCODE RetCode);
+	BOOL IsConnected()
+	{
+		return m_bConnected;
+	}
 	~OdbcDriver(void);
 protected:
 	void FetchResults(int nCols, SQLResult* lpSqlResult);
 	void BindingTitle(SQLCol **ppBinding, int nCols);
 	void BindingData(SQLRow **ppBinding, int nCols);
+	void FreeResult();
 };
 
 #endif

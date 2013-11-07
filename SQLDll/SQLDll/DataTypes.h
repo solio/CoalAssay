@@ -7,11 +7,11 @@ enum SOLIOEXPORT SQLSex { Female = 0, Male};
 
 typedef struct SOLIOEXPORT SQLConnection
 {
-	LPCWSTR strDriver;
-	LPCWSTR strServer;
-	LPCWSTR strDBName;
-	LPCWSTR strUserId;
-	LPCWSTR strPassword;
+	LPWSTR strDriver;
+	LPWSTR strServer;
+	LPWSTR strDBName;
+	LPWSTR strUserId;
+	LPWSTR strPassword;
 }SQLConnection;
 
 typedef struct SOLIOEXPORT SQLRow
@@ -22,7 +22,8 @@ typedef struct SOLIOEXPORT SQLRow
 
 typedef struct SOLIOEXPORT SQLCol
 {
-	LPCWSTR strColName;
+	LPWSTR strColName;
+	//WCHAR*	strColName;
 	struct SQLCol *pNext;
 }SQLCol;
 
@@ -36,13 +37,13 @@ typedef struct SOLIOEXPORT SQLResult
 
 typedef struct SOLIOEXPORT Staff
 {
-	LPCWSTR strStaffNum;
-	LPCWSTR strStaffName;
+	LPWSTR strStaffNum;
+	LPWSTR strStaffName;
 	SQLSex enumStaffSex;
 	TIMESTAMP_STRUCT tsStaffBirthday;
-	LPCWSTR strPosition;
-	LPCWSTR	strPermission;
-	LPCWSTR strPassword;
+	LPWSTR strPosition;
+	LPWSTR	strPermission;	
+	LPWSTR strPassword;
 }Staff;
 
 #endif

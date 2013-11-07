@@ -31,5 +31,29 @@ USE CoalAssay
 --SET @changes = cdc.fn_cdc_get_all_changes_dbo_LoginTokens()
 
 /** ≤‚ ‘‘º ¯ **/
-SELECT * FROM CoalInfo
-INSERT INTO [AshFusionPoint] VALUES(1,1,1.00,1.00,1.00,1.00)
+--SELECT * FROM CoalInfo
+--INSERT INTO [AshFusionPoint] VALUES(1,1,1.00,1.00,1.00,1.00)
+
+/** ≤‚ ‘Auth∫Ø ˝**/
+--SELECT COUNT(*) FROM [dbo].[Staff] 
+--		WHERE [StaffNum] = '1232'
+--		AND [Password] = 'afdg23'
+--SELECT dbo.Auth('1232', 'afdg23')
+EXEC [dbo].Login '1232', 'afdg23'
+
+--SELECT CONVERT(varchar, GETDATE(),20)
+
+/** ≤‚ ‘º”√‹**/
+--DECLARE @ClearPWD varchar(255) ,@pwd varchar(255) 
+--DECLARE @EncryptedPWD varbinary(255),@pwdBinary varbinary(255)
+--SELECT @ClearPWD = 'ADSFDAteARFst' 
+--SELECT @EncryptedPWD = CONVERT(varbinary(255), HASHBYTES('MD5', @ClearPWD)) 
+--SELECT @pwdBinary = CONVERT(varbinary(255), HASHBYTES('MD5',@ClearPWD)) 
+--SELECT @EncryptedPWD 
+--SELECT @pwdBinary
+--IF @EncryptedPWD = @pwdBinary
+--	PRINT 'EQUAL'
+--ELSE
+--	PRINT 'NOT EQUAL'
+--SELECT @pwd = CONVERT(nvarchar(255), @EncryptedPWD)
+--SELECT @pwd

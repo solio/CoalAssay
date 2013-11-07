@@ -6,12 +6,14 @@
 #include <exception>
 using namespace std;
 
-OdbcDriver::OdbcDriver(void)
+OdbcDriver::OdbcDriver(void) :
+	m_bConnected(false)
 {
 	this->m_hEnvironment = NULL;
 	this->m_hOdbc = NULL;
 	this->m_hStatement = NULL;
 	this->m_pCols  = NULL;
+	this->m_pRow = NULL;
 	this->m_pcswQueryString = new WCHAR[1024];
 
     if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_hEnvironment) == SQL_ERROR)
@@ -20,14 +22,14 @@ OdbcDriver::OdbcDriver(void)
 		exit(-1);
     }
 	if (SQLSetEnvAttr(m_hEnvironment, 
-		SQL_ATTR_ODBC_VERSION,
-        (SQLPOINTER)SQL_OV_ODBC3,
-        0) == SQL_ERROR)
+					  SQL_ATTR_ODBC_VERSION,
+					  (SQLPOINTER)SQL_OV_ODBC3,
+					  0) == SQL_ERROR)
 	{
         throw exception("Unable to set odbc driver environment");
 		exit(-1);		
 	}
-	if(SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hOdbc) == SQL_ERROR)
+	if (SQLAllocHandle(SQL_HANDLE_DBC, m_hEnvironment, &m_hOdbc) == SQL_ERROR)
 	{
         throw exception("Unable to allocate odbc driver connection");
 		exit(-1);				
@@ -56,33 +58,18 @@ OdbcDriver::~OdbcDriver(void)
 	{
 		delete m_pcswQueryString;
 	}
-	while(this->m_pCols)
-	{
-		SQLCol* tmpBinding;
-		tmpBinding = this->m_pCols;
-		this->m_pCols = this->m_pCols->pNext;
-		delete tmpBinding->strColName;
-		delete tmpBinding;
-	}
-	while(this->m_pRow)
-	{
-		SQLRow* tmpBinding;
-		tmpBinding = this->m_pRow;
-		this->m_pRow = this->m_pRow->pNext;
-		delete tmpBinding->strColValue;
-		delete tmpBinding;
-	}
+	FreeResult();
 }
 
 int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
 {
-	WCHAR lwcsConn[1024];
+	//WCHAR lwcsConn[1024];
 
-	wcscpy(lwcsConn, lpszConnectedString);
+	//wcscpy(lwcsConn, lpszConnectedString);
 
 	SQLSMALLINT retVal;
 	if( (retVal = SQLDriverConnectW(m_hOdbc, GetDesktopWindow(),
-						lwcsConn, SQL_NTS,
+						(WCHAR*)lpszConnectedString, SQL_NTS,
 						NULL, 0,
 						NULL, SQL_DRIVER_COMPLETE)) == SQL_ERROR)
 	{
@@ -90,21 +77,34 @@ int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
 		this->SetErrorMsg(_T("Unable to connect to the odbc driver"));
 		return SQL_ERROR;
 	}
+	else if (retVal == SQL_SUCCESS_WITH_INFO)
+	{
+		HandleDiagnosticRecord (m_hOdbc, SQL_HANDLE_DBC, retVal);
+		m_bConnected = true;
+	}
+	else
+	{
+		m_bConnected = true;
+	}
 	return retVal;
 }
 
 int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
 {
+	SQLSMALLINT RetCode;
 	if (!m_hStatement)
 	{
-		if ( SQLAllocHandle(SQL_HANDLE_STMT, m_hOdbc, &m_hStatement) == SQL_ERROR)
+		if ( (RetCode = SQLAllocHandle(SQL_HANDLE_STMT, m_hOdbc, &m_hStatement)) == SQL_ERROR)
 		{
+			HandleDiagnosticRecord (m_hOdbc,    
+									SQL_HANDLE_DBC,  
+									RetCode);
 			return SQL_ERROR;
 		}
 	}
 
 	wcscpy(m_pcswQueryString, lpszQueryString);
-	SQLSMALLINT RetCode = SQLExecDirectW(m_hStatement, m_pcswQueryString, SQL_NTS);
+	RetCode = SQLExecDirectW(m_hStatement, m_pcswQueryString, SQL_NTS);
 
 	SQLSMALLINT nNumResults = 0;
 	SQLINTEGER nRowCount = 0;
@@ -122,6 +122,7 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
         {
             // If this is a row-returning query, display
             // results
+			SQLRowCount(m_hStatement, &nRowCount);
             SQLNumResultCols(m_hStatement, &nNumResults);
 
             if (nNumResults > 0)
@@ -129,10 +130,9 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
                 //DisplayResults(hStmt,sNumResults);				
 				retVal = nNumResults;
 				FetchResults(nNumResults, lpSqlResult);
-            } 
+            }
             else
-            {
-                SQLRowCount(m_hStatement, &nRowCount);
+            {                
 				retVal = nRowCount;
 				lpSqlResult->nAffected =  nRowCount;
             }
@@ -207,7 +207,7 @@ void OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
 
 	int nRetCode = SQL_ERROR;
 	int iCol = 0;
-
+	
 	BindingTitle(&this->m_pCols, nCols);
 	BindingData(&this->m_pRow, nCols);
 	
@@ -219,7 +219,7 @@ void OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
 		pThisBinding = pThisBinding->pNext,
 		iCol++)
 	{
-		wstring strTemp(pFirstBinding->strColName);
+		wstring strTemp(pThisBinding->strColName);
 		lpSqlResult->Cols.push_back(strTemp);
 	}
 
@@ -243,12 +243,13 @@ void OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
                 pThisBinding = pThisBinding->pNext,
 				iCol++)
             {
-				wstring strTemp(pFirstBinding->strColValue);
+				wstring strTemp(pThisBinding->strColValue);
 				rowTemp.push_back(strTemp);
             }
 			lpSqlResult->Rows.push_back(rowTemp);
 		}
 	}while(!bDataNotFounded);
+	FreeResult();
 }
 
 void OdbcDriver::BindingTitle(SQLCol **ppBinding, int nCols)
@@ -272,9 +273,10 @@ void OdbcDriver::BindingTitle(SQLCol **ppBinding, int nCols)
             *ppBinding = pThisBinding;
         }
         else
-        {
+        {			
             pLastBinding->pNext = pThisBinding;
         }
+		pThisBinding->pNext = NULL;
         pLastBinding = pThisBinding;
 
 
@@ -282,24 +284,25 @@ void OdbcDriver::BindingTitle(SQLCol **ppBinding, int nCols)
         // the data.   Figure out the length of the column name
 
         SQLColAttributeW(m_hStatement,
-            iCol,
-            SQL_DESC_NAME,
-            NULL,
-            0,
-            &nColumnNameLength,
-            NULL);
+						 iCol,
+						 SQL_DESC_NAME,
+						 NULL,
+						 0,
+						 &nColumnNameLength,
+						 NULL);
 
 		pThisBinding->strColName = new WCHAR[(nColumnNameLength + 1) * sizeof(WCHAR)];
-
+		
         // Map this buffer to the driver's buffer.As above do.
 
-        SQLBindCol(m_hStatement,
-            iCol,
-            SQL_C_TCHAR,
-			(SQLPOINTER) pThisBinding->strColName,
-            (nColumnNameLength + 1) * sizeof(WCHAR),
-            NULL);
-    }		
+        SQLColAttributeW(m_hStatement,
+						 iCol,
+						 SQL_DESC_NAME,
+						 (WCHAR*)pThisBinding->strColName,
+						 (nColumnNameLength + 1) * sizeof(WCHAR),
+						 &nColumnNameLength,
+						 NULL);
+    }	
 }
 
 void OdbcDriver::BindingData(SQLRow **ppBinding, int nCols)
@@ -323,9 +326,10 @@ void OdbcDriver::BindingData(SQLRow **ppBinding, int nCols)
             *ppBinding = pThisBinding;
         }
         else
-        {
+        {			
             pLastBinding->pNext = pThisBinding;
         }
+		pThisBinding->pNext = NULL;
         pLastBinding = pThisBinding;
 
 
@@ -368,6 +372,28 @@ void OdbcDriver::BindingData(SQLRow **ppBinding, int nCols)
             (nDisplay + 1) * sizeof(WCHAR),
             NULL);
     }	
+}
+
+void OdbcDriver::FreeResult()
+{
+	while(this->m_pCols)
+	{
+		SQLCol* tmpBinding;
+		tmpBinding = this->m_pCols;
+		this->m_pCols = this->m_pCols->pNext;
+		delete tmpBinding->strColName;
+		delete tmpBinding;
+	}
+	while(this->m_pRow)
+	{
+		SQLRow* tmpBinding;
+		tmpBinding = this->m_pRow;
+		this->m_pRow = this->m_pRow->pNext;
+		delete tmpBinding->strColValue;
+		delete tmpBinding;
+	}	
+	this->m_pCols = NULL;
+	this->m_pRow = NULL;
 }
 
 void OdbcDriver::HandleDiagnosticRecord (SQLHANDLE      hHandle,    

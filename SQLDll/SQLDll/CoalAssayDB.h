@@ -4,15 +4,32 @@
 #include "OdbcDriver.h"
 #include "SqlServerQueryBuilder.h"
 
-class SOLIOEXPORT CoalAssayDB
+class SOLIOEXPORT CoalAssayDB : public OdbcDriver, public SqlServerQueryBuilder
 {
 private:
-	OdbcDriver m_driverSqlServer;
+	SQLResult*	m_pSet;
+	WCHAR*		m_pcswToken;
 public:
 	CoalAssayDB(void);
 	~CoalAssayDB(void);
 
-	bool Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword);
+	//bool Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword);
+	int Login(Staff& lStaff);
+
+	void SetBindingSet(SQLResult *lpSet)
+	{
+		m_pSet = lpSet;
+	}
+protected:
+	void SetToken(const WCHAR *lpszToken)
+	{
+		if(m_pcswToken)
+			delete m_pcswToken;
+		m_pcswToken = new WCHAR[wcslen(lpszToken) + 1];
+		wcscpy(m_pcswToken, lpszToken);
+	}
+protected:
+	void GetStaff(Staff& lStaff, const SQLResult* lpSet);
 };
 
 #endif
