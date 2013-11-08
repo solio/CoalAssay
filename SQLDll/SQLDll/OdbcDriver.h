@@ -37,7 +37,7 @@ public:
 	}
 	~OdbcDriver(void);
 protected:
-	void FetchResults(int nCols, SQLResult* lpSqlResult);
+	int FetchResults(int nCols, SQLResult* lpSqlResult);
 	void BindingTitle(SQLCol **ppBinding, int nCols);
 	void BindingData(SQLRow **ppBinding, int nCols);
 	void FreeResult();

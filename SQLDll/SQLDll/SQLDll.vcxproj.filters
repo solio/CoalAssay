@@ -33,6 +33,9 @@
     <ClCompile Include="CoalAssayDB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DataTypes.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OdbcDriver.h">

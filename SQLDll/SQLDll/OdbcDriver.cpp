@@ -39,25 +39,7 @@ OdbcDriver::OdbcDriver(void) :
 
 OdbcDriver::~OdbcDriver(void)
 {
-    if (m_hStatement)
-    {
-        SQLFreeHandle(SQL_HANDLE_STMT, m_hStatement);
-    }
-
-    if (m_hOdbc)
-    {
-        SQLDisconnect(m_hOdbc);
-        SQLFreeHandle(SQL_HANDLE_DBC, m_hOdbc);
-    }
-
-    if (m_hEnvironment)
-    {
-        SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
-    }
-	if(m_pcswQueryString)
-	{
-		delete m_pcswQueryString;
-	}
+	Disconnect();
 	FreeResult();
 }
 
@@ -122,20 +104,21 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
         {
             // If this is a row-returning query, display
             // results
-			SQLRowCount(m_hStatement, &nRowCount);
+			//SQLRowCount(m_hStatement, &nRowCount);
             SQLNumResultCols(m_hStatement, &nNumResults);
 
+			//retVal = nRowCount;
             if (nNumResults > 0)
             {
                 //DisplayResults(hStmt,sNumResults);				
-				retVal = nNumResults;
-				FetchResults(nNumResults, lpSqlResult);
-            }
-            else
-            {                
-				retVal = nRowCount;
+				nRowCount = FetchResults(nNumResults, lpSqlResult);
 				lpSqlResult->nAffected =  nRowCount;
             }
+            
+			if(nRowCount > 0)
+				retVal = nRowCount;
+			else
+				retVal = SQL_NONDATA;
             break;
         }
 
@@ -155,11 +138,34 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
     }
 
 	SQLFreeStmt(m_hStatement, SQL_CLOSE);
-	return retVal;
+	return nRowCount;
 }
 
 int OdbcDriver::Disconnect()
 {
+    if (m_hStatement)
+    {
+        SQLFreeHandle(SQL_HANDLE_STMT, m_hStatement);
+		m_hStatement = NULL;
+    }
+
+    if (m_hOdbc)
+    {
+        SQLDisconnect(m_hOdbc);
+        SQLFreeHandle(SQL_HANDLE_DBC, m_hOdbc);
+		m_hOdbc = NULL;
+    }
+
+    if (m_hEnvironment)
+    {
+        SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
+		m_hEnvironment = NULL;
+    }
+	if(m_pcswQueryString)
+	{
+		delete m_pcswQueryString;
+		m_pcswQueryString;
+	}
 	return 0;
 }
 
@@ -200,13 +206,13 @@ int OdbcDriver::Connect(LPCWSTR lpszDriver,
 	return Connect(szConnStr);
 }
 
-void OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
+int OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
 {
 	if(!lpSqlResult)
-		return;
+		return 0;
 
 	int nRetCode = SQL_ERROR;
-	int iCol = 0;
+	int iCol = 0, nRows = 0;
 	
 	BindingTitle(&this->m_pCols, nCols);
 	BindingData(&this->m_pRow, nCols);
@@ -246,10 +252,13 @@ void OdbcDriver::FetchResults(int nCols, SQLResult* lpSqlResult)
 				wstring strTemp(pThisBinding->strColValue);
 				rowTemp.push_back(strTemp);
             }
+			nRows++;
 			lpSqlResult->Rows.push_back(rowTemp);
 		}
 	}while(!bDataNotFounded);
 	FreeResult();
+
+	return nRows;
 }
 
 void OdbcDriver::BindingTitle(SQLCol **ppBinding, int nCols)
@@ -412,7 +421,7 @@ void OdbcDriver::HandleDiagnosticRecord (SQLHANDLE      hHandle,
         return;
     }
 
-    while (SQLGetDiagRec(hType,
+    while (SQLGetDiagRecW(hType,
                          hHandle,
                          ++iRec,
                          wszState,

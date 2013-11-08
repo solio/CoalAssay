@@ -67,6 +67,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CoalAssayDB.cpp" />
+    <ClCompile Include="DataTypes.cpp" />
     <ClCompile Include="IDriver.cpp" />
     <ClCompile Include="OdbcDriver.cpp" />
     <ClCompile Include="QueryBuilder.cpp" />

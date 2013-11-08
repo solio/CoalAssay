@@ -44,16 +44,22 @@ EXEC [dbo].Login '1232', 'afdg23'
 --SELECT CONVERT(varchar, GETDATE(),20)
 
 /** ≤‚ ‘º”√‹**/
---DECLARE @ClearPWD varchar(255) ,@pwd varchar(255) 
---DECLARE @EncryptedPWD varbinary(255),@pwdBinary varbinary(255)
---SELECT @ClearPWD = 'ADSFDAteARFst' 
---SELECT @EncryptedPWD = CONVERT(varbinary(255), HASHBYTES('MD5', @ClearPWD)) 
+DECLARE @ClearPWD varchar(255) ,@pwd varchar(255) 
+DECLARE @EncryptedPWD varbinary(255),@pwdBinary varbinary(255)
+SELECT @ClearPWD = 'ADSFDAteARFst' 
+SELECT @EncryptedPWD = CONVERT(varbinary(255), HASHBYTES('MD5', @ClearPWD))
+SELECT @EncryptedPWD
+DECLARE @pwdString varchar(255)--= CONVERT(varbinary(255), '0x229EC0B72316448782B54987D5438007')
 --SELECT @pwdBinary = CONVERT(varbinary(255), HASHBYTES('MD5',@ClearPWD)) 
---SELECT @EncryptedPWD 
 --SELECT @pwdBinary
 --IF @EncryptedPWD = @pwdBinary
 --	PRINT 'EQUAL'
 --ELSE
 --	PRINT 'NOT EQUAL'
+SELECT @pwdString = HASHBYTES('MD5', @ClearPWD)
+IF @EncryptedPWD = @pwdString
+	PRINT 'EQUAL'
+ELSE
+	PRINT 'NOT EQUAL'
 --SELECT @pwd = CONVERT(nvarchar(255), @EncryptedPWD)
 --SELECT @pwd

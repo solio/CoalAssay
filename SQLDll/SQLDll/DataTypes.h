@@ -16,7 +16,7 @@ typedef struct SOLIOEXPORT SQLConnection
 
 typedef struct SOLIOEXPORT SQLRow
 {	
-	LPCWSTR strColValue;
+	LPWSTR strColValue;
 	struct SQLRow *pNext;
 }SQLRow;
 
@@ -35,15 +35,33 @@ typedef struct SOLIOEXPORT SQLResult
 	vector<vector<wstring>> Rows;
 }SQLResult;
 
-typedef struct SOLIOEXPORT Staff
+class SOLIOEXPORT Staff
 {
-	LPWSTR strStaffNum;
-	LPWSTR strStaffName;
-	SQLSex enumStaffSex;
-	TIMESTAMP_STRUCT tsStaffBirthday;
-	LPWSTR strPosition;
-	LPWSTR	strPermission;	
-	LPWSTR strPassword;
-}Staff;
+private:
+	LPWSTR m_strStaffNum;
+	LPWSTR m_strStaffName;
+	SQLSex m_enumStaffSex;
+	TIMESTAMP_STRUCT m_tsStaffBirthday;
+	LPWSTR m_strPosition;
+	LPWSTR m_strPermission;
+	LPWSTR m_strPassword;
+public:
+	Staff();
+	void SetStaffNum(LPCWSTR lpszStaffNum);
+	void SetStaffName(LPCWSTR lpszStaffName);
+	void SetStaffSex(const SQLSex& lsex);
+	void SetStaffBirthday(int nYear, int nMonth, int nDay);
+	void SetPosition(LPCWSTR lpszPosition);
+	void SetPermission(LPCWSTR lpszPermission);
+	void SetPassword(LPCWSTR lpszPassword);
+	void GetStaffNum(LPWSTR lpszStaffNum);
+	void GetStaffName(LPWSTR lpszStaffName);
+	void GetStaffSex(SQLSex& lsex);
+	void GetStaffBirthday(TIMESTAMP_STRUCT& ltsBirthday);
+	void GetPosition(LPWSTR lpszPosition);
+	void GetPermission(LPWSTR lpszPermission);
+	void GetPassword(LPWSTR lpszPassword);
+	~Staff();
+};
 
 #endif

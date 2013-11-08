@@ -23,10 +23,15 @@ int CoalAssayDB::Login(Staff& lStaff)
 
 	SQLSMALLINT	nRetCode;
 	WCHAR wcsQueryString[1024];
+	WCHAR wcsStaffNum[50];
+	WCHAR wcsPassword[50];
 
+	lStaff.GetStaffNum(wcsStaffNum);
+	lStaff.GetPassword(wcsPassword);
 	wsprintf(wcsQueryString, 
 			 L"EXEC dbo.Login '%s', '%s'",
-			 lStaff.strStaffNum, lStaff.strPassword);
+			 wcsStaffNum, wcsPassword);
+
 	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
 	if(nRetCode >= 0)
 		GetStaff(lStaff, m_pSet);
@@ -35,9 +40,9 @@ int CoalAssayDB::Login(Staff& lStaff)
 
 void CoalAssayDB::GetStaff(Staff& lStaff, const SQLResult* lpSet)
 {
-	if(!lpSet || (lpSet->Cols.size() < 0) || 
-		(lpSet->Rows.size() < 0) || 
-		(lpSet->Rows[0].size() < 0))
+	if(!lpSet || (lpSet->Cols.size() <= 0) || 
+		(lpSet->Rows.size() <= 0) || 
+		(lpSet->Rows[0].size() <= 0))
 		return;
 	
 	for(int i = 0; i < lpSet->Cols.size(); i++)
@@ -48,30 +53,40 @@ void CoalAssayDB::GetStaff(Staff& lStaff, const SQLResult* lpSet)
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffName"))
 		{
-			lStaff.strStaffName = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
-			wcscpy((WCHAR*)lStaff.strStaffName, lpSet->Rows[0][i].c_str());
+			//lStaff.strStaffName = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
+			//wcscpy((WCHAR*)lStaff.strStaffName, lpSet->Rows[0][i].c_str());
+			lStaff.SetStaffName(lpSet->Rows[0][i].c_str());
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffSex"))
 		{
-			lStaff.enumStaffSex =  _wtoi(lpSet->Rows[0][i].c_str()) == 0? 
-								   SQLSex::Female : SQLSex::Male;
+			//lStaff.enumStaffSex =  _wtoi(lpSet->Rows[0][i].c_str()) == 0? 
+			//					   SQLSex::Female : SQLSex::Male;
+			SQLSex ls =  _wtoi(lpSet->Rows[0][i].c_str()) == 0? 
+							SQLSex::Female : SQLSex::Male;
+			lStaff.SetStaffSex(ls);
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffBirthday"))
 		{
+			//swscanf(lpSet->Rows[0][i].c_str(), L"%d-%d-%d", 
+			//		&lStaff.tsStaffBirthday.year, 
+			//		&lStaff.tsStaffBirthday.month, 
+			//		&lStaff.tsStaffBirthday.day);
+			int nYear = 0, nMonth = 0, nDay = 0;
 			swscanf(lpSet->Rows[0][i].c_str(), L"%d-%d-%d", 
-					&lStaff.tsStaffBirthday.year, 
-					&lStaff.tsStaffBirthday.month, 
-					&lStaff.tsStaffBirthday.day);
+					&nYear, &nMonth, &nDay);
+			lStaff.SetStaffBirthday(nYear, nMonth, nDay);
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"Position"))
 		{
-			lStaff.strPosition = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
-			wcscpy((WCHAR*)lStaff.strPosition, lpSet->Rows[0][i].c_str());		
+/*			lStaff.strPosition = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
+			wcscpy((WCHAR*)lStaff.strPosition, lpSet->Rows[0][i].c_str());*/	
+			lStaff.SetPosition(lpSet->Rows[0][i].c_str());
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"Permission"))
 		{
-			lStaff.strPermission = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
-			wcscpy((WCHAR*)lStaff.strPermission, lpSet->Rows[0][i].c_str());		
+/*			lStaff.strPermission = new WCHAR[wcslen(lpSet->Rows[0][i].c_str()) + 1];
+			wcscpy((WCHAR*)lStaff.strPermission, lpSet->Rows[0][i].c_str());*/		
+			lStaff.SetPermission(lpSet->Rows[0][i].c_str());
 		}
 	}
 }

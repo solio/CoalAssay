@@ -34,16 +34,16 @@ void PrintResultSet(const SQLResult& lSet)
 
 void PrintStaff(const Staff& lStaff)
 {
-	wprintf(L"\n");
-	wprintf(L"Name:%s\n", lStaff.strStaffName);
-	wprintf(L"Birthday:%4d-%2d-%2d\n", 
-			lStaff.tsStaffBirthday.year, 
-			lStaff.tsStaffBirthday.month, 
-			lStaff.tsStaffBirthday.day);
-	wprintf(L"Position:%s\n", lStaff.strPosition);
-	wprintf(L"Sex:%d\n", lStaff.enumStaffSex);
-	wprintf(L"Permision:%s\n", lStaff.strPermission);
-	wprintf(L"\n");
+	//wprintf(L"\n");
+	//wprintf(L"Name:%s\n", lStaff.strStaffName);
+	//wprintf(L"Birthday:%4d-%2d-%2d\n", 
+	//		lStaff.tsStaffBirthday.year, 
+	//		lStaff.tsStaffBirthday.month, 
+	//		lStaff.tsStaffBirthday.day);
+	//wprintf(L"Position:%s\n", lStaff.strPosition);
+	//wprintf(L"Sex:%d\n", lStaff.enumStaffSex);
+	//wprintf(L"Permision:%s\n", lStaff.strPermission);
+	//wprintf(L"\n");
 }
 
 int main(int argc, char **argv)
@@ -72,10 +72,12 @@ int main(int argc, char **argv)
 	//	wprintf(_T("%s"), db.GetMsg());
 	//}
 	Staff lstaff;
-	lstaff.strStaffNum = new WCHAR[wcslen(_T("1232")) + 1];
-	lstaff.strPassword = new WCHAR[wcslen(_T("afdg23")) + 1];
-	wcscpy((WCHAR*)lstaff.strStaffNum, _T("1232"));
-	wcscpy((WCHAR*)lstaff.strPassword, _T("afdg23"));
+	//lstaff.strStaffNum = new WCHAR[wcslen(_T("1232")) + 1];
+	//lstaff.strPassword = new WCHAR[wcslen(_T("afdg23")) + 1];
+	//wcscpy((WCHAR*)lstaff.strStaffNum, _T("1232"));
+	//wcscpy((WCHAR*)lstaff.strPassword, _T("afdg23"));
+	lstaff.SetStaffNum(L"1232");
+	lstaff.SetPassword(L"afdg23");
 
 
 	if ((nRetCode = db.Login(lstaff) < 0))
