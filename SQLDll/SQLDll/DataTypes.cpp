@@ -25,6 +25,34 @@ Staff::~Staff()
 	if(m_strPassword)
 		delete m_strPassword;
 }
+void Staff::Copy(Staff& lstaff)
+{
+	WCHAR wcsQueryString[1024];
+	WCHAR wcsStaffNum[50];
+	WCHAR wcsStaffName[50];
+	TIMESTAMP_STRUCT tsBirthday;
+	SQLSex enumStaffSex;
+	WCHAR wcsPosition[50];
+	WCHAR wcsPermission[50];
+	WCHAR wcsPassword[50];
+
+	lstaff.GetPassword(wcsPassword);
+	lstaff.GetPermission(wcsPermission);
+	lstaff.GetPosition(wcsPosition);
+	lstaff.GetStaffBirthday(tsBirthday);
+	lstaff.GetStaffName(wcsStaffName);
+	lstaff.GetStaffNum(wcsStaffNum);
+	lstaff.GetStaffSex(enumStaffSex);
+
+	this->SetPassword(wcsPassword);
+	this->SetPermission(wcsPermission);
+	this->SetPosition(wcsPosition);
+	this->SetStaffBirthday(tsBirthday.year, tsBirthday.month, tsBirthday.day);
+	this->SetStaffName(wcsStaffName);
+	this->GetStaffNum(wcsStaffNum);
+	this->GetStaffSex(enumStaffSex);
+
+}
 void Staff::SetStaffNum(LPCWSTR lpszStaffNum)
 {
 	if(m_strStaffNum)
@@ -97,7 +125,7 @@ void Staff::GetPosition(LPWSTR lpszPosition)
 void Staff::GetPermission(LPWSTR lpszPermission)
 {
 	if(lpszPermission)
-		wcscpy(lpszPermission, m_strStaffNum);
+		wcscpy(lpszPermission, m_strPermission);
 }
 void Staff::GetPassword(LPWSTR lpszPassword)
 {

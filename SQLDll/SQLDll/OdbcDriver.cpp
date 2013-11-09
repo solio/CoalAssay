@@ -74,22 +74,22 @@ int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
 int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
 {
 	SQLSMALLINT RetCode;
-	if (!m_hStatement)
+	SetStatement();
+	if (!lpSqlResult)
 	{
-		if ( (RetCode = SQLAllocHandle(SQL_HANDLE_STMT, m_hOdbc, &m_hStatement)) == SQL_ERROR)
-		{
-			HandleDiagnosticRecord (m_hOdbc,    
-									SQL_HANDLE_DBC,  
-									RetCode);
-			return SQL_ERROR;
-		}
+		return SQL_NONBINDING;
+	}
+	else
+	{
+		lpSqlResult->Cols.clear();
+		lpSqlResult->Rows.clear();
 	}
 
 	wcscpy(m_pcswQueryString, lpszQueryString);
 	RetCode = SQLExecDirectW(m_hStatement, m_pcswQueryString, SQL_NTS);
 
-	SQLSMALLINT nNumResults = 0;
-	SQLINTEGER nRowCount = 0;
+	SQLSMALLINT nNumCols = 0;
+	SQLINTEGER nAffected = 0, nResultCount = 0;
 	int retVal = SQL_ERROR;
 	switch(RetCode)
     {
@@ -104,21 +104,17 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
         {
             // If this is a row-returning query, display
             // results
-			//SQLRowCount(m_hStatement, &nRowCount);
-            SQLNumResultCols(m_hStatement, &nNumResults);
+			SQLRowCount(m_hStatement, &nAffected);
+            SQLNumResultCols(m_hStatement, &nNumCols);
 
-			//retVal = nRowCount;
-            if (nNumResults > 0)
+			//retVal = nAffected;
+            if (nNumCols > 0)
             {
                 //DisplayResults(hStmt,sNumResults);				
-				nRowCount = FetchResults(nNumResults, lpSqlResult);
-				lpSqlResult->nAffected =  nRowCount;
+				nResultCount = FetchResults(nNumCols, lpSqlResult);
             }
-            
-			if(nRowCount > 0)
-				retVal = nRowCount;
-			else
-				retVal = SQL_NONDATA;
+            lpSqlResult->nAffected =  nAffected;
+
             break;
         }
 
@@ -138,7 +134,9 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
     }
 
 	SQLFreeStmt(m_hStatement, SQL_CLOSE);
-	return nRowCount;
+	m_hStatement = NULL;
+
+	return retVal;
 }
 
 int OdbcDriver::Disconnect()
@@ -421,6 +419,7 @@ void OdbcDriver::HandleDiagnosticRecord (SQLHANDLE      hHandle,
         return;
     }
 
+	WCHAR pcswMsg[1024] = L"";
     while (SQLGetDiagRecW(hType,
                          hHandle,
                          ++iRec,
@@ -431,12 +430,13 @@ void OdbcDriver::HandleDiagnosticRecord (SQLHANDLE      hHandle,
                          (SQLSMALLINT *)NULL) == SQL_SUCCESS)
     {
         // Hide data truncated..
+		WCHAR pcswNote[1024] = L"";
         if (wcsncmp(wszState, L"01004", 5))
-        {
-			WCHAR pcswMsg[1024];
-            wsprintf(pcswMsg, L"[%5.5s] %s (%d)\n", wszState, wszMessage, iError);
-			this->SetErrorMsg(pcswMsg);
+        {			
+            wsprintf(pcswNote, L"[%5.5s] %s (%d)\n", wszState, wszMessage, iError);
+			this->SetErrorMsg(pcswNote);
         }
+		wcscat(pcswMsg, pcswNote);
     }
 
 }

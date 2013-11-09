@@ -26,11 +26,14 @@ using namespace std;
 /* Error defination
 /*
 /************************************************/
-#define SQL_ERROR_BASE			-10086
+#define SQL_ERROR_BASE			-2000
 #define SQL_NONCONNECTED		SQL_ERROR_BASE - 1
 #define SQL_NONBINDING			SQL_ERROR_BASE - 2
 #define SQL_NONDATA				SQL_ERROR_BASE - 3
-#define LOGIC_BASE				-12000
+#define SQL_NOAFFECTED			SQL_ERROR_BASE - 4
+#define LOGIC_BASE				-2500
 #define LOGIC_USERERROR			LOGIC_BASE - 1
+#define LOGIC_PERMISSIONDENIED	LOGIC_BASE - 2
+#define LOGIC_NODATA			LOGIC_BASE - 3
 
 #endif

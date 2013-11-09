@@ -15,6 +15,8 @@ public:
 
 	//bool Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword);
 	int Login(Staff& lStaff);
+	int AddStaff(Staff& lStaff);
+	int DeleteStaff(LPCWSTR lpcsStaffNum);
 
 	void SetBindingSet(SQLResult *lpSet)
 	{

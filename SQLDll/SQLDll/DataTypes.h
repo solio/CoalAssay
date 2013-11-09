@@ -47,6 +47,7 @@ private:
 	LPWSTR m_strPassword;
 public:
 	Staff();
+	void Copy(Staff& lstaff);
 	void SetStaffNum(LPCWSTR lpszStaffNum);
 	void SetStaffName(LPCWSTR lpszStaffName);
 	void SetStaffSex(const SQLSex& lsex);

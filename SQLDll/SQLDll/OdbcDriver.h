@@ -35,6 +35,20 @@ public:
 	{
 		return m_bConnected;
 	}
+	int SetStatement() 
+	{
+		int nRetCode;
+		if(!m_hStatement)
+		{
+			if ( (nRetCode = SQLAllocHandle(SQL_HANDLE_STMT, m_hOdbc, &m_hStatement)) == SQL_ERROR)
+			{
+				HandleDiagnosticRecord (m_hOdbc,    
+										SQL_HANDLE_DBC,  
+										nRetCode);
+				return SQL_ERROR;
+			}
+		}	
+	}
 	~OdbcDriver(void);
 protected:
 	int FetchResults(int nCols, SQLResult* lpSqlResult);
