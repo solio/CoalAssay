@@ -136,7 +136,7 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
 	SQLFreeStmt(m_hStatement, SQL_CLOSE);
 	m_hStatement = NULL;
 
-	return retVal;
+	return RetCode;
 }
 
 int OdbcDriver::Disconnect()

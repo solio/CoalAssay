@@ -13,10 +13,12 @@ public:
 	CoalAssayDB(void);
 	~CoalAssayDB(void);
 
-	//bool Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword);
+	//bool Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword);s	
 	int Login(Staff& lStaff);
 	int AddStaff(Staff& lStaff);
+	int EditUser(Staff& lStaff);
 	int DeleteStaff(LPCWSTR lpcsStaffNum);
+	int SelectAllStaff(StaffArray& arrStaff);
 
 	void SetBindingSet(SQLResult *lpSet)
 	{
@@ -31,7 +33,9 @@ protected:
 		wcscpy(m_pcswToken, lpszToken);
 	}
 protected:
-	void GetStaff(Staff& lStaff, const SQLResult* lpSet);
+	void GetStaff(Staff& lStaff, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
 };
 
 #endif

@@ -38,15 +38,16 @@ typedef struct SOLIOEXPORT SQLResult
 class SOLIOEXPORT Staff
 {
 private:
-	LPWSTR m_strStaffNum;
-	LPWSTR m_strStaffName;
+	WCHAR m_strStaffNum[50];
+	WCHAR m_strStaffName[20];
 	SQLSex m_enumStaffSex;
 	TIMESTAMP_STRUCT m_tsStaffBirthday;
-	LPWSTR m_strPosition;
-	LPWSTR m_strPermission;
-	LPWSTR m_strPassword;
+	WCHAR m_strPosition[50];
+	WCHAR m_strPermission[50];
+	WCHAR m_strPassword[50];
 public:
 	Staff();
+	Staff(const Staff& lstaff);
 	void Copy(Staff& lstaff);
 	void SetStaffNum(LPCWSTR lpszStaffNum);
 	void SetStaffName(LPCWSTR lpszStaffName);
@@ -55,14 +56,30 @@ public:
 	void SetPosition(LPCWSTR lpszPosition);
 	void SetPermission(LPCWSTR lpszPermission);
 	void SetPassword(LPCWSTR lpszPassword);
-	void GetStaffNum(LPWSTR lpszStaffNum);
-	void GetStaffName(LPWSTR lpszStaffName);
+
+
+	void GetStaffNum(LPCWSTR lpszStaffNum);
+	void GetStaffName(LPCWSTR lpszStaffName);
 	void GetStaffSex(SQLSex& lsex);
 	void GetStaffBirthday(TIMESTAMP_STRUCT& ltsBirthday);
-	void GetPosition(LPWSTR lpszPosition);
-	void GetPermission(LPWSTR lpszPermission);
-	void GetPassword(LPWSTR lpszPassword);
+	void GetPosition(LPCWSTR lpszPosition);
+	void GetPermission(LPCWSTR lpszPermission);
+	void GetPassword(LPCWSTR lpszPassword);
 	~Staff();
 };
 
+class SOLIOEXPORT StaffArray
+{
+public:
+	StaffArray() : pStaffs(NULL), count(0)
+	{}
+	~StaffArray()
+	{
+		if(pStaffs)
+			delete[] pStaffs;
+	}
+public:
+	Staff *pStaffs;
+	int count;
+};
 #endif

@@ -33,48 +33,58 @@ int CoalAssayDB::Login(Staff& lStaff)
 			 wcsStaffNum, wcsPassword);
 
 	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
-	if(nRetCode >= 0)
-		GetStaff(lStaff, m_pSet);
+	if(m_pSet->Rows.size() > 0 && m_pSet->Cols.size() > 1)	
+		GetStaff(lStaff, m_pSet, 0);
+	else
+		nRetCode = LOGIC_USERERROR;
 	return nRetCode;
 }
 
-void CoalAssayDB::GetStaff(Staff& lStaff, const SQLResult* lpSet)
+void CoalAssayDB::GetStaff(Staff& lStaff, 
+						   const SQLResult* lpSet, 
+						   int nRowIndex)
 {
 	if(!lpSet || (lpSet->Cols.size() <= 0) || 
 		(lpSet->Rows.size() <= 0) || 
+		(nRowIndex >= lpSet->Rows.size() ||
 		(lpSet->Rows[0].size() <= 0))
+		)
 		return;
 	
 	for(int i = 0; i < lpSet->Cols.size(); i++)
 	{
 		if(!wcscmp(lpSet->Cols[i].c_str(), L"Token"))
 		{
-			SetToken(lpSet->Rows[0][i].c_str());
+			SetToken(lpSet->Rows[nRowIndex][i].c_str());
+		}
+		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffNum"))
+		{
+			lStaff.SetStaffNum(lpSet->Rows[nRowIndex][i].c_str());
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffName"))
 		{
-			lStaff.SetStaffName(lpSet->Rows[0][i].c_str());
+			lStaff.SetStaffName(lpSet->Rows[nRowIndex][i].c_str());
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffSex"))
 		{
-			SQLSex ls =  _wtoi(lpSet->Rows[0][i].c_str()) == 0? 
+			SQLSex ls =  _wtoi(lpSet->Rows[nRowIndex][i].c_str()) == 0? 
 							SQLSex::Female : SQLSex::Male;
 			lStaff.SetStaffSex(ls);
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"StaffBirthday"))
 		{
 			int nYear = 0, nMonth = 0, nDay = 0;
-			swscanf(lpSet->Rows[0][i].c_str(), L"%d-%d-%d", 
+			swscanf(lpSet->Rows[nRowIndex][i].c_str(), L"%d-%d-%d", 
 					&nYear, &nMonth, &nDay);
 			lStaff.SetStaffBirthday(nYear, nMonth, nDay);
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"Position"))
 		{
-			lStaff.SetPosition(lpSet->Rows[0][i].c_str());
+			lStaff.SetPosition(lpSet->Rows[nRowIndex][i].c_str());
 		}
 		else if(!wcscmp(lpSet->Cols[i].c_str(), L"Permission"))
 		{
-			lStaff.SetPermission(lpSet->Rows[0][i].c_str());
+			lStaff.SetPermission(lpSet->Rows[nRowIndex][i].c_str());
 		}
 	}
 }
@@ -85,6 +95,8 @@ int CoalAssayDB::AddStaff(Staff& lStaff)
 		return SQL_NONCONNECTED;
 	if(!m_pSet)
 		return SQL_NONBINDING;
+	if(!m_pcswToken)
+		return LOGIC_NOLOGINED;
 
 	SQLSMALLINT	nRetCode = SQL_ERROR;
 	WCHAR wcsQueryString[1024];
@@ -104,7 +116,7 @@ int CoalAssayDB::AddStaff(Staff& lStaff)
 	lStaff.GetPassword(wcsPassword);
 	lStaff.GetPermission(wcsPermission);
 	wsprintf(wcsQueryString,
-			//@Token, @StaffNum, @StaffName, @StaffSex, @StaffBirthday, @Position, @Password, @Permission
+			 //@Token, @StaffNum, @StaffName, @StaffSex, @StaffBirthday, @Position, @Password, @Permission
 			 L"EXEC [dbo].AddStaff '%s','%s','%s','%s','%4d-%2d-%2d','%s','%s','%s'",
 			 this->m_pcswToken,
 			 wcsStaffNum,
@@ -124,22 +136,120 @@ int CoalAssayDB::AddStaff(Staff& lStaff)
 		nRetCode = LOGIC_NODATA;
 		SetErrorMsg(_T("No Data"));
 	}
-	//if(m_pSet->Cols.size() <= 0 ||
-	//   m_pSet->Rows.size() <= 0 ||
-	//   m_pSet->Rows[0].size() <= 0)
-	//{
-	//	nRetCode = SQL_ERROR;
-	//}
-	//else if(!wcscmp(m_pSet->Cols[0].c_str(), L"AddedResult") && 
-	//		!wcscmp(m_pSet->Rows[0][0].c_str(), L"SUCCESS"))
-	//{
-	//	nRetCode = 1;
-	//}
-	//else
-	//{
-	//	nRetCode = LOGIC_PERMISSIONDENIED;
-	//	this->SetErrorMsg((WCHAR*)m_pSet->Rows[0][0].c_str());
-	//}
+	return nRetCode;
+}
+
+int CoalAssayDB::EditUser(Staff& lStaff)
+{
+	if(!IsConnected())
+		return SQL_NONCONNECTED;
+	if(!m_pSet)
+		return SQL_NONBINDING;
+	if(!m_pcswToken)
+		return LOGIC_NOLOGINED;
+
+	SQLSMALLINT	nRetCode = SQL_ERROR;
+	WCHAR wcsQueryString[1024];
+	WCHAR wcsStaffNum[50];
+	WCHAR wcsStaffName[50];
+	TIMESTAMP_STRUCT tsBirthday;
+	SQLSex enumStaffSex;
+	WCHAR wcsPosition[50];
+	WCHAR wcsPermission[50];
+	WCHAR wcsPassword[50];
+
+	lStaff.GetStaffNum(wcsStaffNum);
+	lStaff.GetStaffName(wcsStaffName);
+	lStaff.GetStaffSex(enumStaffSex);
+	lStaff.GetStaffBirthday(tsBirthday);
+	lStaff.GetPosition(wcsPosition);
+	lStaff.GetPassword(wcsPassword);
+	lStaff.GetPermission(wcsPermission);
+	wsprintf(wcsQueryString,
+			 //@StaffNum, @StaffName, @StaffSex, @StaffBirthday, @Position, @Password, @Permission
+			 L"EXEC [dbo].EditStaff '%s','%s','%s','%4d-%2d-%2d','%s','%s','%s'",
+			 wcsStaffNum,
+			 wcsStaffName,
+			 (enumStaffSex == SQLSex::Female? L"0" : L"1"),
+			 tsBirthday.year, tsBirthday.month, tsBirthday.day,
+			 wcsPosition,
+			 wcsPassword,
+			 wcsPermission);
+	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
+
+	if(m_pSet->nAffected > 0)
+		nRetCode = m_pSet->nAffected;
+	else
+	{
+		nRetCode = LOGIC_NODATA;
+		SetErrorMsg(_T("No Data"));
+	}
+}
+
+int CoalAssayDB::DeleteStaff(LPCWSTR lpcsStaffNum)
+{
+	if(!IsConnected())
+		return SQL_NONCONNECTED;
+	if(!m_pSet)
+		return SQL_NONBINDING;
+	if(!m_pcswToken)
+		return LOGIC_NOLOGINED;
+
+	SQLSMALLINT	nRetCode = SQL_ERROR;
+	WCHAR wcsQueryString[1024];
+
+	wsprintf(wcsQueryString,
+			 L"EXEC [dbo].DeleteStaff '%s', '%s'",
+			 m_pcswToken,
+			 lpcsStaffNum);
+
+	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
+
+	if(m_pSet->nAffected > 0)
+		nRetCode = m_pSet->nAffected;
+	else
+	{
+		nRetCode = LOGIC_NODATA;
+		SetErrorMsg(_T("No Data"));
+	}
+	return nRetCode;
+}
+
+int CoalAssayDB::SelectAllStaff(StaffArray& arrStaff)
+{
+	if(!IsConnected())
+		return SQL_NONCONNECTED;
+	if(!m_pSet)
+		return SQL_NONBINDING;
+	if(!m_pcswToken)
+		return LOGIC_NOLOGINED;
+
+	SQLSMALLINT	nRetCode = SQL_ERROR;
+	WCHAR wcsQueryString[1024];
+
+	wsprintf(wcsQueryString,
+			 L"EXEC [dbo].SelectAllStaff '%s'",
+			 m_pcswToken);
+
+	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
+
+	if(m_pSet->Rows.size() > 0 && m_pSet->Cols.size() == 6)
+	{
+		nRetCode = m_pSet->Rows.size();
+		Staff *pStaffs = new Staff[m_pSet->Rows.size()];
+		for(int i = 0; i < m_pSet->Rows.size(); i++)
+		{			
+			Staff lStaff;
+			GetStaff(pStaffs[i], m_pSet, i);
+		}
+		arrStaff.pStaffs = pStaffs;
+		arrStaff.count = m_pSet->Rows.size();
+	}
+	else
+	{
+		nRetCode = LOGIC_NODATA;
+		SetErrorMsg(_T("No Data"));
+	}
 	return nRetCode;
 }
 
@@ -206,48 +316,6 @@ int CoalAssayDB::AddStaff(Staff& lStaff)
 //	return nRetCode;
 //}
 
-int CoalAssayDB::DeleteStaff(LPCWSTR lpcsStaffNum)
-{
-	if(!IsConnected())
-		return SQL_NONCONNECTED;
-	if(!m_pSet)
-		return SQL_NONBINDING;
-
-	SQLSMALLINT	nRetCode = SQL_ERROR;
-	WCHAR wcsQueryString[1024];
-
-	wsprintf(wcsQueryString,
-			 L"EXEC [dbo].DeleteStaff '%s', '%s'",
-			 m_pcswToken,
-			 lpcsStaffNum);
-
-	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
-
-	if(m_pSet->nAffected > 0)
-		nRetCode = m_pSet->nAffected;
-	else
-	{
-		nRetCode = LOGIC_NODATA;
-		SetErrorMsg(_T("No Data"));
-	}
-	//if(m_pSet->Cols.size() <= 0 ||
-	//   m_pSet->Rows.size() <= 0 ||
-	//   m_pSet->Rows[0].size() <= 0)
-	//{
-	//	nRetCode = SQL_ERROR;
-	//}
-	//else if(!wcscmp(m_pSet->Cols[0].c_str(), L"DeletedResult") && 
-	//		!wcscmp(m_pSet->Rows[0][0].c_str(), L"SUCCESS"))
-	//{
-	//	nRetCode = 1;
-	//}
-	//else
-	//{
-	//	nRetCode = LOGIC_PERMISSIONDENIED;
-	//	this->SetErrorMsg((WCHAR*)m_pSet->Rows[0][0].c_str());
-	//}
-	return nRetCode;
-}
 //bool CoalAssayDB::Login(const LPCWSTR szStaffNum, const LPCWSTR szPassword)
 //{
 //	int nRet = 0;

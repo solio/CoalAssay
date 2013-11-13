@@ -43,6 +43,7 @@ BEGIN
 	DROP FUNCTION [dbo].IsAdmin
 END
 GO
+
 CREATE FUNCTION [dbo].IsAdmin(
 	@Token varchar(500)
 )
@@ -71,6 +72,32 @@ GO
 
 IF Exists (
 	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[Track]'))
+BEGIN
+	DROP PROCEDURE [dbo].Track
+END
+GO
+
+CREATE PROCEDURE [dbo].Track(
+	@Token nvarchar(50),
+	@Operation nvarchar(50),	
+	@Dest nvarchar(50),
+	@Note nvarchar(50)
+)
+AS
+BEGIN
+	DECLARE @Now DATETIME = GETDATE()
+	INSERT INTO [dbo].OperationTrack 
+		([Token], [Operation], [Dest], [Time], [Note])
+	VALUES(
+		@Token, @Operation, @Dest, @Now, @Note
+	)
+	RETURN @@ROWCOUNT
+END
+GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
 	WHERE object_id = OBJECT_ID(N'[dbo].[Login]'))
 BEGIN
 	DROP PROCEDURE [dbo].Login
@@ -81,21 +108,27 @@ CREATE PROCEDURE [dbo].Login
 	@StaffNum nvarchar(50),
 	@Password nvarchar(50)
 AS
-	DECLARE @Token varbinary(50), @ID int
+	DECLARE @Token varbinary(50)
 	DECLARE @hashPwd varbinary(50) = HASHBYTES('MD5', @Password)
-	DECLARE @now date = GETDATE()
+	DECLARE @ID int, @now DATETIME = GETDATE()	
 	--SELECT @Password as Password, @hashPwd as hashPwd --debug
 	SET @Token = [dbo].Auth(@StaffNum, @Password)
+	DECLARE @TokenString nvarchar(50) = UPPER(sys.fn_varbintohexstr(@Token))
 	SELECT @Token AS Token,
 		[StaffName], [StaffSex],[StaffBirthday],[Position],[Permission]
 	FROM [Staff]
-	WHERE [StaffNum] = @StaffNum AND [Password] = @hashPwd
+	WHERE [StaffNum] = @StaffNum AND [Password] = @hashPwd AND [Permission] <> 'Z'
 	SELECT @ID = [ID]
 	FROM [Staff]	
-	WHERE [StaffNum] = @StaffNum AND [Password] = @hashPwd
+	WHERE [StaffNum] = @StaffNum AND [Password] = @hashPwd AND [Permission] <> 'Z'
 	--SELECT @ID --debug
 	IF @ID IS NOT NULL
-		INSERT INTO [dbo].LoginTokens values(@Token, @ID, @now)
+	BEGIN
+		INSERT INTO [dbo].LoginTokens VALUES(@Token, @ID, @now)
+		EXEC [dbo].Track @TokenString, 'Select', 'Login', 'SUCCESS'
+	END
+	ELSE
+		EXEC [dbo].Track @TokenString, 'Select', 'Login', 'ERROR'
 GO
 
 IF Exists (
@@ -107,7 +140,7 @@ END
 GO
 
 CREATE PROCEDURE [dbo].AddStaff
-	@Token nvarchar(500),
+	@Token nvarchar(50),
 	@StaffNum nvarchar(50),
 	@StaffName nvarchar(20),
 	@StaffSex nvarchar(1),
@@ -118,6 +151,7 @@ CREATE PROCEDURE [dbo].AddStaff
 AS
 BEGIN
 	DECLARE @hashPswd varbinary(50) = HASHBYTES('MD5', @Password)--varchar(50) 
+	DECLARE @now DATETIME = GETDATE()
 	--SELECT @hashPswd = HASHBYTES('MD5', @Password)
 	IF [dbo].IsAdmin(@Token) = 1
 	BEGIN
@@ -130,6 +164,11 @@ BEGIN
 				Position = @Position, [Password] = @hashPswd, Permission = @Permission
 			WHERE
 				StaffNum = @StaffNum 
+			IF @@ROWCOUNT = 1
+			BEGIN
+				SELECT 'SUCCESS' AS AddedResult
+				EXEC [dbo].Track @Token, 'INSERT', 'AddStaff', 'SUCCESS Exist Before'
+			END
 		END
 		ELSE
 		BEGIN
@@ -142,13 +181,59 @@ BEGIN
 		END
 		--SELECT @hashPswd --debug
 		IF @@ROWCOUNT = 1
-			SELECT 'SUCCESS' --AS AddedResult
+		BEGIN
+			SELECT 'SUCCESS' AS AddedResult
+			EXEC [dbo].Track @Token, 'INSERT', 'AddStaff', 'SUCCESS Not Exist Before'
+		END
 		ELSE
-			SELECT 'NODATA INSERT' --AS AddedResult
+		BEGIN
+			SELECT 'NODATA INSERT' AS AddedResult
+			EXEC [dbo].Track @Token, 'INSERT', 'AddStaff', 'ERROR NODATA INSERT'
+		END
 	END
 	ELSE
 	BEGIN
-		SELECT 'ERROR Permission Denied' --AS AddedResult
+		SELECT 'ERROR Permission Denied' AS AddedResult
+		EXEC [dbo].Track @Token, 'INSERT', 'AddStaff', 'ERROR Permission Denied'
+	END
+END
+GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[EditStaff]'))
+BEGIN
+	DROP PROCEDURE [dbo].EditStaff
+END
+GO
+
+CREATE PROCEDURE [dbo].EditStaff
+	@StaffNum nvarchar(50),
+	@StaffName nvarchar(20),
+	@StaffSex nvarchar(1),
+	@StaffBirthday date,
+	@Position nvarchar(50),
+	@Password nvarchar(50),
+	@Permission nvarchar(1)
+AS
+BEGIN
+	DECLARE @hashPswd varbinary(50) = HASHBYTES('MD5', @Password)--varchar(50)
+	DECLARE @Token nvarchar(255)	
+	UPDATE [Staff] SET
+		StaffName = @StaffName, StaffSex = @StaffSex, StaffBirthday = @StaffBirthday, 
+		Position = @Position, [Password] = @hashPswd, Permission = @Permission
+		WHERE [StaffNum] = @StaffNum
+	IF @@ROWCOUNT = 1
+	BEGIN
+		SELECT @Token = [Token] FROM [Staff],[LoginTokens] 
+			WHERE [StaffNum] = @StaffNum AND [Staff].ID = [LoginTokens].StaffID
+		SELECT 'SUCCESS' --AS AddedResult
+		EXEC [dbo].Track @Token, 'UPDATE','EditStaff', 'SUCCESS'
+	END
+	ELSE
+	BEGIN
+		SELECT 'NODATA UPDATED' --AS AddedResult
+		EXEC [dbo].Track 'WRONG', 'UPDATE','EditStaff', 'ERROR NODATA UPDATED'
 	END
 END
 GO
@@ -170,13 +255,51 @@ BEGIN
 	BEGIN
 		UPDATE [Staff] SET [Permission] = 'Z' WHERE [StaffNum] = @StaffNum
 		IF @@ROWCOUNT = 1
+		BEGIN
 			SELECT 'SUCCCESS' AS DeletedResult
+			EXEC [dbo].Track @Token,'DELETE','DeleteStaff', 'SUCCESS'
+		END
 		ELSE
-			SELECT 'NODATA INSERT' AS DeletedResult
+		BEGIN
+			SELECT 'NODATA DELETED' AS DeletedResult
+			EXEC [dbo].Track @Token,'DELETE','DeleteStaff', 'ERROR NODATA DELETED'
+		END
 	END
 	ELSE
 	BEGIN
 		SELECT 'ERROR Permission Denied' AS DeletedResult
+		EXEC [dbo].Track @Token,'DELETE','DeleteStaff', 'ERROR Permission Denied'
 	END	
+END
+GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[SelectAllStaff]'))
+BEGIN
+	DROP PROCEDURE [dbo].SelectAllStaff
+END
+GO
+
+CREATE PROCEDURE [dbo].SelectAllStaff
+	@Token varchar(50)
+AS
+BEGIN
+	--DECLARE @IsToken nchar(1)
+	--SET @IsToken = (SELECT [Permission] FROM [Staff], [LoginTokens] 
+	--				WHERE 
+	--					UPPER(sys.fn_varbintohexstr(dbo.[LoginTokens].[Token])) = ('0X' + @Token)
+	--					AND dbo.[LoginTokens].[StaffID] = [Staff].ID)	
+	IF [dbo].IsAdmin(@Token) = 1
+	BEGIN
+		SELECT [StaffNum],[StaffName],[StaffSex],[StaffBirthday],[Position],[Permission]
+			FROM [Staff] WHERE [Permission] <> 'Z'
+		EXEC [dbo].Track @Token,'SELECT','SelectAllStaff', 'SUCCESS'
+	END
+	ELSE
+	BEGIN
+		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
+		EXEC [dbo].Track @Token,'SELECT','SelectAllStaff', 'ERROR Permission Denied'
+	END
 END
 GO

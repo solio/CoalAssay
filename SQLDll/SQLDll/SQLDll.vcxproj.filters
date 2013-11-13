@@ -27,9 +27,6 @@
     <ClCompile Include="QueryBuilder.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SqlServer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CoalAssayDB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -54,9 +51,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="QueryBuilder.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SqlServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoalAssayDB.h">

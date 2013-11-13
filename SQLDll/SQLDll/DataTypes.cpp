@@ -4,30 +4,35 @@
 
 #include "DataTypes.h"
 
-Staff::Staff() :
-	m_strStaffNum(NULL), m_strStaffName(NULL),
-	m_strPosition(NULL), m_strPermission(NULL),
-	m_strPassword(NULL)
+Staff::Staff()
 {
 	memset(&m_tsStaffBirthday, 0, sizeof(m_tsStaffBirthday));
+	memset(&m_strStaffNum, 0, sizeof(m_strStaffNum));
+	memset(&m_strStaffName, 0, sizeof(m_strStaffName));
+	memset(&m_strPosition, 0, sizeof(m_strPosition));
+	memset(&m_strPermission, 0, sizeof(m_strPermission));
+	memset(&m_strPassword, 0, sizeof(m_strPassword));
 	m_enumStaffSex = SQLSex::Male;
+}
+Staff::Staff(const Staff& lstaff)
+{
+	wcscpy(m_strStaffNum, lstaff.m_strStaffNum);
+	wcscpy(m_strStaffName, lstaff.m_strStaffName);
+	wcscpy(m_strPosition, lstaff.m_strPosition);
+	wcscpy(m_strPermission, lstaff.m_strPermission);
+	wcscpy(m_strPassword, lstaff.m_strPassword);	
+
+	m_enumStaffSex = lstaff.m_enumStaffSex;
+	m_tsStaffBirthday.year = lstaff.m_tsStaffBirthday.year;
+	m_tsStaffBirthday.month = lstaff.m_tsStaffBirthday.month;
+	m_tsStaffBirthday.day = lstaff.m_tsStaffBirthday.day;
 }
 Staff::~Staff()
 {
-	if(m_strStaffNum)
-		delete m_strStaffNum;
-	if(m_strStaffName)
-		delete m_strStaffName;
-	if(m_strPosition)
-		delete m_strPosition;
-	if(m_strPermission)
-		delete m_strPermission;
-	if(m_strPassword)
-		delete m_strPassword;
+
 }
 void Staff::Copy(Staff& lstaff)
 {
-	WCHAR wcsQueryString[1024];
 	WCHAR wcsStaffNum[50];
 	WCHAR wcsStaffName[50];
 	TIMESTAMP_STRUCT tsBirthday;
@@ -49,22 +54,16 @@ void Staff::Copy(Staff& lstaff)
 	this->SetPosition(wcsPosition);
 	this->SetStaffBirthday(tsBirthday.year, tsBirthday.month, tsBirthday.day);
 	this->SetStaffName(wcsStaffName);
-	this->GetStaffNum(wcsStaffNum);
-	this->GetStaffSex(enumStaffSex);
+	this->SetStaffNum(wcsStaffNum);
+	this->SetStaffSex(enumStaffSex);
 
 }
 void Staff::SetStaffNum(LPCWSTR lpszStaffNum)
 {
-	if(m_strStaffNum)
-		delete m_strStaffNum;
-	m_strStaffNum = new WCHAR[wcslen(lpszStaffNum) + 1];
 	wcscpy(m_strStaffNum, lpszStaffNum);
 }
 void Staff::SetStaffName(LPCWSTR lpszStaffName)
 {
-	if(m_strStaffName)
-		delete m_strStaffName;
-	m_strStaffName = new WCHAR[wcslen(lpszStaffName) + 1];
 	wcscpy(m_strStaffName, lpszStaffName);
 }
 void Staff::SetStaffSex(const SQLSex& lsex)
@@ -79,35 +78,26 @@ void Staff::SetStaffBirthday(int nYear, int nMonth, int nDay)
 }
 void Staff::SetPosition(LPCWSTR lpszPosition)
 {
-	if(m_strPosition)
-		delete m_strPosition;
-	m_strPosition = new WCHAR[wcslen(lpszPosition) + 1];
 	wcscpy(m_strPosition, lpszPosition);
 }
 void Staff::SetPermission(LPCWSTR lpszPermission)
 {
-	if(m_strPermission)
-		delete m_strPermission;
-	m_strPermission = new WCHAR[wcslen(lpszPermission) + 1];
 	wcscpy(m_strPermission, lpszPermission);
 }
 void Staff::SetPassword(LPCWSTR lpszPassword)
 {
-	if(m_strPassword)
-		delete m_strPassword;
-	m_strPassword = new WCHAR[wcslen(lpszPassword) + 1];
 	wcscpy(m_strPassword, lpszPassword);
 }
 
-void Staff::GetStaffNum(LPWSTR lpszStaffNum)
+void Staff::GetStaffNum(LPCWSTR lpszStaffNum)
 {
 	if(lpszStaffNum)
-		wcscpy(lpszStaffNum, m_strStaffNum);
+		wcscpy((WCHAR*)lpszStaffNum, m_strStaffNum);
 }
-void Staff::GetStaffName(LPWSTR lpszStaffName)
+void Staff::GetStaffName(LPCWSTR lpszStaffName)
 {
 	if(lpszStaffName)
-		wcscpy(lpszStaffName, m_strStaffName);
+		wcscpy((WCHAR*)lpszStaffName, m_strStaffName);
 }
 void Staff::GetStaffSex(SQLSex& lsex)
 {
@@ -117,18 +107,18 @@ void Staff::GetStaffBirthday(TIMESTAMP_STRUCT& ltsBirthday)
 {
 	ltsBirthday = m_tsStaffBirthday;
 }
-void Staff::GetPosition(LPWSTR lpszPosition)
+void Staff::GetPosition(LPCWSTR lpszPosition)
 {
 	if(lpszPosition)
-		wcscpy(lpszPosition, m_strPosition);
+		wcscpy((WCHAR*)lpszPosition, m_strPosition);
 }
-void Staff::GetPermission(LPWSTR lpszPermission)
+void Staff::GetPermission(LPCWSTR lpszPermission)
 {
 	if(lpszPermission)
-		wcscpy(lpszPermission, m_strPermission);
+		wcscpy((WCHAR*)lpszPermission, m_strPermission);
 }
-void Staff::GetPassword(LPWSTR lpszPassword)
+void Staff::GetPassword(LPCWSTR lpszPassword)
 {
 	if(lpszPassword)
-		wcscpy(lpszPassword, m_strPassword);
+		wcscpy((WCHAR*)lpszPassword, m_strPassword);
 }

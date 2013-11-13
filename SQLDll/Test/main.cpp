@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 		WCHAR wcsMsg[1024];
 		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
 		wprintf(L"%ls", db.GetErrorMsg());
+		return -1;
 	}
 	else
 	{
@@ -109,24 +110,37 @@ int main(int argc, char **argv)
 	{
 		WCHAR wcsMsg[1024];
 		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());		
+		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
 	}
 	else
 	{
-		wprintf(L"ADD SUCCESS\n");		
+		wprintf(L"ADD SUCCESS\n");
 	}
-
 
 	if ((nRetCode = db.DeleteStaff(L"041030234")) < 0)
 	{
 		WCHAR wcsMsg[1024];
 		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());		
+		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
 	}
 	else
 	{
-		wprintf(L"DELETE SUCCESS\n");		
+		wprintf(L"DELETE SUCCESS\n");
 	}
+
+	//vector<Staff> arrStaffs;
+	StaffArray arrStaffs;
+	if ((nRetCode = db.SelectAllStaff(arrStaffs)) < 0)
+	{
+		WCHAR wcsMsg[1024];
+		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
+		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
+	}
+	else
+	{
+		wprintf(L"SELECT SUCCESS\n");
+	}
+
 	getchar();
 	return 0;
 }

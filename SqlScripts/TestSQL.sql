@@ -119,13 +119,16 @@ USE CoalAssay
 --	'B'
 --EXEC [dbo].DeleteStaff '41DF61F07564046C179D477BF4694DAD', '041030234'
 
-EXEC [dbo].AddStaff 
-	'D322AA1D23AFD8ECC251DFB73D604F33',
-	'041030234',
-	'NewStaff',
-	'1',
-	'2013-11- 9',
-	'一般员工',
-	'w36308458',
-	'B'
-EXEC [dbo].DeleteStaff '41DF61F07564046C179D477BF4694DAD', '041030234'
+--EXEC [dbo].AddStaff 
+--	'D322AA1D23AFD8ECC251DFB73D604F33',
+--	'041030234',
+--	'NewStaff',
+--	'1',
+--	'2013-11- 9',
+--	'一般员工',
+--	'w36308458',
+--	'B'
+--EXEC [dbo].DeleteStaff '41DF61F07564046C179D477BF4694DAD', '041030234'
+
+/** 测试跟踪操作**/
+EXEC [dbo].Track 'token test', 'SELECT', 'Login', 'SUCCESS'

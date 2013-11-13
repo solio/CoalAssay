@@ -2,7 +2,13 @@ SQLDll.opensdf
 SQLDll.sdf
 SQLDll.suo
 SQLDll/SQLDll/Debug
+SQLDll/SQLDll/Release/
 SQLDLL/ipch/
 SQLDll/Debug/
+SQLDll/Release/
 SQLDll/Test/Debug
+SQLDll/Test/Release/
 SQLDll/Export/
+SQLDll/CoalManagementCtrl/
+SQLDll/_UpgradeReport_Files/
+SQLDll/UpgradeLog.XML
