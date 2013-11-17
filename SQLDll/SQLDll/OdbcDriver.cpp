@@ -53,10 +53,10 @@ int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
 	if( (retVal = SQLDriverConnectW(m_hOdbc, GetDesktopWindow(),
 						(WCHAR*)lpszConnectedString, SQL_NTS,
 						NULL, 0,
-						NULL, SQL_DRIVER_COMPLETE)) == SQL_ERROR)
+						NULL, SQL_DRIVER_NOPROMPT)) == SQL_ERROR)
 	{
 		//throw exception("Unable to connect to the odbc driver");
-		this->SetErrorMsg(_T("Unable to connect to the odbc driver"));
+		HandleDiagnosticRecord (m_hOdbc, SQL_HANDLE_DBC, retVal);
 		return SQL_ERROR;
 	}
 	else if (retVal == SQL_SUCCESS_WITH_INFO)
@@ -78,6 +78,10 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
 	if (!lpSqlResult)
 	{
 		return SQL_NONBINDING;
+	}
+	else if(!m_bConnected)
+	{
+		return SQL_NONCONNECTED;
 	}
 	else
 	{
@@ -321,6 +325,7 @@ void OdbcDriver::BindingData(SQLRow **ppBinding, int nCols)
 
     for (iCol = 1; iCol <= nCols; iCol++)
     {
+		nDisplay = 0;
         pThisBinding = new SQLRow;
         if (!(pThisBinding))
         {

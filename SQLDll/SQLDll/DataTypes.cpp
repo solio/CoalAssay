@@ -122,3 +122,119 @@ void Staff::GetPassword(LPCWSTR lpszPassword)
 	if(lpszPassword)
 		wcscpy((WCHAR*)lpszPassword, m_strPassword);
 }
+
+CoalInfo::CoalInfo()
+{
+	memset(m_wcsCoalLotNum, 0, sizeof(m_wcsCoalLotNum));
+	memset(m_wcsAssayCode,	0, sizeof(m_wcsAssayCode));
+	memset(&m_tsAssayDate,	0, sizeof(m_tsAssayDate));
+	memset(&m_tsSampleDate,	0, sizeof(m_tsSampleDate));
+	memset(&m_nAssayType,	0, sizeof(m_nAssayType));					//0入厂化验、1入炉化验、2矿方化验、3第三方化验
+	memset(m_wcsAssayStaff, 0, sizeof(m_wcsAssayStaff));
+	memset(m_wcsSampleStaff, 0, sizeof(m_wcsSampleStaff));
+	memset(m_wcsStageName,	0, sizeof(m_wcsStageName));
+	memset(m_wcsWorksName,	0, sizeof(m_wcsWorksName));
+
+	m_tsAssayDate.year = 1970;
+	m_tsAssayDate.month = 1;
+	m_tsAssayDate.day = 1;
+
+	m_tsSampleDate.year = 1970;
+	m_tsSampleDate.month = 1;
+	m_tsSampleDate.day = 1;
+}
+
+CoalInfo::~CoalInfo()
+{
+
+}
+
+void CoalInfo::SetCoalLotNum(LPCWSTR lwcsCoalLotNum)
+{
+	wcscpy(m_wcsCoalLotNum, lwcsCoalLotNum);
+}
+
+void CoalInfo::SetAssayCode(LPCWSTR lwcsAssayCode)
+{
+	wcscpy(m_wcsAssayCode, lwcsAssayCode);
+}
+
+void CoalInfo::SetAssayDate(TIMESTAMP_STRUCT& ltsAssayDate)
+{
+	m_tsAssayDate = ltsAssayDate;
+}
+
+void CoalInfo::SetSampleDate(TIMESTAMP_STRUCT& ltsSampleDate)
+{
+	m_tsSampleDate = ltsSampleDate;
+}
+
+void CoalInfo::SetAssayType(AssayType	lnAssayType)
+{
+	m_nAssayType = lnAssayType;
+}
+
+void CoalInfo::SetAssayStaff(LPCWSTR lwcsAssayStaff)
+{
+	wcscpy(m_wcsAssayStaff, lwcsAssayStaff);
+}
+
+void CoalInfo::SetSampleStaff(LPCWSTR lwcsSampleStaff)
+{
+	wcscpy(m_wcsSampleStaff, lwcsSampleStaff);
+}
+
+void CoalInfo::SetStageName(LPCWSTR lwcsStageName)
+{
+	wcscpy(m_wcsStageName, lwcsStageName);
+}
+
+void CoalInfo::SetWorksName(LPCWSTR lwcsWorksName)
+{
+	wcscpy(m_wcsWorksName, lwcsWorksName);
+}
+
+LPCWSTR CoalInfo::GetCoalLotNum() const
+{
+	return this->m_wcsCoalLotNum;
+}
+
+LPCWSTR CoalInfo::GetAssayCode() const
+{
+	return this->m_wcsAssayCode;
+}
+
+const TIMESTAMP_STRUCT CoalInfo::GetAssayDate() const
+{
+	return this->m_tsAssayDate;
+}
+
+const TIMESTAMP_STRUCT CoalInfo::GetSampleDate() const
+{
+	return this->m_tsSampleDate;
+}
+
+const AssayType	CoalInfo::GetAssayType() const
+{
+	return this->m_nAssayType;
+}
+
+LPCWSTR CoalInfo::GetAssayStaff() const
+{
+	return this->m_wcsAssayStaff;
+}
+
+LPCWSTR CoalInfo::GetSampleStaff() const
+{
+	return this->m_wcsSampleStaff;
+}
+
+LPCWSTR CoalInfo::GetStageName() const
+{
+	return this->m_wcsStageName;
+}
+
+LPCWSTR CoalInfo::GetWorksName() const
+{
+	return this->m_wcsWorksName;
+}

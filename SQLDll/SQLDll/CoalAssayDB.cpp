@@ -3,6 +3,7 @@
 #endif
 
 #include "CoalAssayDB.h"
+#include "Task.h"
 
 CoalAssayDB::CoalAssayDB(void) :
 	m_pcswToken(NULL)
@@ -33,8 +34,11 @@ int CoalAssayDB::Login(Staff& lStaff)
 			 wcsStaffNum, wcsPassword);
 
 	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
-	if(m_pSet->Rows.size() > 0 && m_pSet->Cols.size() > 1)	
+	if(m_pSet->Rows.size() > 0 && m_pSet->Cols.size() > 1)
+	{
+		nRetCode = m_pSet->Rows.size();
 		GetStaff(lStaff, m_pSet, 0);
+	}
 	else
 		nRetCode = LOGIC_USERERROR;
 	return nRetCode;
@@ -250,6 +254,247 @@ int CoalAssayDB::SelectAllStaff(StaffArray& arrStaff)
 		nRetCode = LOGIC_NODATA;
 		SetErrorMsg(_T("No Data"));
 	}
+	return nRetCode;
+}
+
+int CoalAssayDB::CorrespondingConnect(DeviceType enumType,
+							LPCWSTR lpszDriver,
+							LPCWSTR lpszServer,
+							LPCWSTR lpszDBName,
+							LPCWSTR lpszUid,
+							LPCWSTR lpszPwd)
+{
+	BOOL bRet = FALSE;
+
+	switch(enumType)
+	{
+	case DeviceType::AshFusionPoint:
+		bRet = this->m_oDbcAFP.Connect(lpszDriver, lpszServer,
+									   lpszDBName, lpszUid,
+									   lpszPwd);
+		break;
+	case DeviceType::CaloriMeter:
+		bRet = this->m_oDbcCM.Connect(lpszDriver, lpszServer,
+									  lpszDBName, lpszUid,
+									  lpszPwd);
+		break;
+	case DeviceType::ElementAnalyzer:
+		bRet = this->m_oDbcEA.Connect(lpszDriver, lpszServer,
+									  lpszDBName, lpszUid,
+									  lpszPwd);
+		break;
+	case DeviceType::LightWaveMeter:
+		bRet = this->m_oDbcLWM.Connect(lpszDriver, lpszServer,
+									   lpszDBName, lpszUid,
+									   lpszPwd);
+		break;
+	case DeviceType::SulfurDetector:
+		bRet = this->m_oDbcSD.Connect(lpszDriver, lpszServer,
+									  lpszDBName, lpszUid,
+									  lpszPwd);
+		break;
+	case DeviceType::WorkPointInstrument:
+		bRet = this->m_oDbcWPI.Connect(lpszDriver, lpszServer,
+									   lpszDBName, lpszUid,
+									   lpszPwd);
+		break;
+	default:
+		bRet = FALSE;
+		break;
+	}
+
+	return bRet;
+}
+
+BOOL CoalAssayDB::IsCorrespondingConnected(const DeviceType enumType)
+{
+	BOOL bRet = FALSE;
+
+	switch(enumType)
+	{
+	case DeviceType::AshFusionPoint:
+		bRet = this->m_oDbcAFP.IsConnected();
+		break;
+	case DeviceType::CaloriMeter:
+		bRet = this->m_oDbcCM.IsConnected();
+		break;
+	case DeviceType::ElementAnalyzer:
+		bRet = this->m_oDbcEA.IsConnected();
+		break;
+	case DeviceType::LightWaveMeter:
+		bRet = this->m_oDbcLWM.IsConnected();
+		break;
+	case DeviceType::SulfurDetector:
+		bRet = this->m_oDbcSD.IsConnected();
+		break;
+	case DeviceType::WorkPointInstrument:
+		bRet = this->m_oDbcWPI.IsConnected();
+		break;
+	default:
+		bRet = FALSE;
+		break;
+	}
+
+	return bRet;
+}
+
+// there are several table is contact to the CoalInfo table.
+// when add a new CoalInfo you need to specify the corresponding table
+// insert a blank record to .
+int CoalAssayDB::AddCorrespondingBlank(const AssayTask& oTask)
+{
+	SQLSMALLINT	nRetCode = SQL_ERROR;
+
+	for(int i = 0; i < oTask.Devices.size(); i++)
+	{
+		switch(oTask.Devices[i])
+		{
+		case DeviceType::AshFusionPoint:
+			nRetCode = this->m_oDbcAFP.ExecuteQuery(L"", m_pSet);
+			break;
+		case DeviceType::CaloriMeter:
+			nRetCode = this->m_oDbcCM.ExecuteQuery(
+				L"INSERT INTO win5emdb (Standard) VALUES('0')", m_pSet);
+			break;
+		case DeviceType::ElementAnalyzer:
+			nRetCode = this->m_oDbcEA.ExecuteQuery(L"", m_pSet);
+			break;
+		case DeviceType::LightWaveMeter:
+			nRetCode = this->m_oDbcLWM.ExecuteQuery(L"", m_pSet);
+			break;
+		case DeviceType::SulfurDetector:
+			nRetCode = this->m_oDbcSD.ExecuteQuery(L"", m_pSet);
+			break;
+		case DeviceType::WorkPointInstrument:
+			nRetCode = this->m_oDbcWPI.ExecuteQuery(L"", m_pSet);
+			break;
+		default:
+			nRetCode = FALSE;
+			break;
+		}		
+	}
+
+	return nRetCode;
+}
+
+int CoalAssayDB::AddCoalInfo(const CoalInfo& lCoalInfo, int *lpnCoalId)
+{
+	if(!IsConnected())
+		return SQL_NONCONNECTED;
+	if(!m_pSet)
+		return SQL_NONBINDING;
+	if(!m_pcswToken)
+		return LOGIC_NOLOGINED;
+
+	SQLSMALLINT	nRetCode = SQL_ERROR;
+	WCHAR wcsQueryString[1024];
+
+	wsprintf(wcsQueryString,
+			 //Token,[CoalLotNum],[AssayCode],[AssayDate],[SampleDate],[AssayType],[AssayStaff],[SampleStaff],[StageName],[WorksName]
+			 L"EXEC [dbo].AddCoalInfo '%s','%s','%s','%4d-%2d-%2d','%4d-%2d-%2d','%d','%s','%s','%s','%s'",
+			 m_pcswToken,
+			 lCoalInfo.GetCoalLotNum(),
+			 lCoalInfo.GetAssayCode(),
+			 lCoalInfo.GetAssayDate().year, lCoalInfo.GetAssayDate().month, lCoalInfo.GetAssayDate().day,
+			 lCoalInfo.GetSampleDate().year, lCoalInfo.GetSampleDate().month, lCoalInfo.GetSampleDate().day,
+			 (int)lCoalInfo.GetAssayType(),
+			 lCoalInfo.GetAssayStaff(),
+			 lCoalInfo.GetSampleStaff(),
+			 lCoalInfo.GetStageName(),
+			 lCoalInfo.GetWorksName());
+
+	nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
+	if(m_pSet->nAffected > 0)
+	{
+		nRetCode = m_pSet->nAffected;	
+		wsprintf(wcsQueryString, L"SELECT TOP 1 [ID],[CoalLotNum] FROM [CoalInfo] ORDER BY [ID] DESC", m_pSet);
+		nRetCode = ExecuteQuery(wcsQueryString, m_pSet);
+		if(m_pSet->Rows.size() > 0 && m_pSet->Rows[0].size())
+			(*lpnCoalId) = _wtoi(m_pSet->Rows[0][0].c_str());
+	}
+	else
+		nRetCode = LOGIC_NODATA;
+	return nRetCode;
+}
+
+int CoalAssayDB::CreateNewTask(const AssayTask& oTask)
+{
+	int nId = -1;
+	int nRetCode = 0;
+	AssayTask *poTaskTmp = new AssayTask[oTask.Devices.size()];
+
+	if(nRetCode = AddCoalInfo(oTask.CoalInfo, &nId))
+		return LOGIC_CREATETASKFAIL;
+	
+	for(int i = 0; i < oTask.Devices.size(); i++)
+	{
+		AddCorrespondingBlank(oTask);
+	}
+
+	// Create Task thread for each related table
+	for(int i = 0; i < oTask.Devices.size(); i++)
+	{
+		poTaskTmp[i] = oTask;
+		switch(oTask.Devices[i])
+		{
+		case DeviceType::AshFusionPoint:
+			poTaskTmp[i].CurrentDevice = DeviceType::AshFusionPoint;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		case DeviceType::CaloriMeter:
+			poTaskTmp[i].CurrentDevice = DeviceType::CaloriMeter;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		case DeviceType::ElementAnalyzer:
+			poTaskTmp[i].CurrentDevice = DeviceType::ElementAnalyzer;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		case DeviceType::LightWaveMeter:
+			poTaskTmp[i].CurrentDevice = DeviceType::LightWaveMeter;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		case DeviceType::SulfurDetector:
+			poTaskTmp[i].CurrentDevice = DeviceType::SulfurDetector;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		case DeviceType::WorkPointInstrument:
+			poTaskTmp[i].CurrentDevice = DeviceType::WorkPointInstrument;
+			poTaskTmp[i].ThreadHandle = CreateThread(NULL, 0, AssayTaskProc, &poTaskTmp[i], 0, &poTaskTmp[i].ThreadId);
+			CloseHandle(poTaskTmp[i].ThreadHandle);
+			poTaskTmp[i].ThreadHandle = NULL;
+			break;
+		default:
+
+			break;
+		}
+	}
+
+	// wait for all assay task is finish
+	while(TRUE)
+	{
+		BOOL bFinish = TRUE;
+		for(int i = 0; i < oTask.Devices.size(); i++)
+		{
+			if(!poTaskTmp[i].Finish)
+				bFinish = FALSE;
+		}
+		
+		if(bFinish)
+			break;
+
+		Sleep(oTask.TurnsElapse);
+	}
+
 	return nRetCode;
 }
 

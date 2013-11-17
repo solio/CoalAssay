@@ -54,93 +54,124 @@ int main(int argc, char **argv)
 	CoalAssayDB db;
 
 	db.SetBindingSet(&set);
-	if(db.Connect(L"SQL Server", 
-				  L"SOLIO-PC\\SOLIOENTERPRISE", 
-				  L"CoalAssay", 
-				  L"sa", 
-				  L"Xzd091217") < 0)
+	// SQL Server test
+	//if((nRetCode = db.Connect(L"SQL Server", 
+	//						  L"SOLIO-PC\\SOLIOENTERPRISE", 
+	//						  L"CoalAssay", 
+	//						  L"sa", 
+	//						  L"Xzd091217")) < 0)
+	//{
+	//	wprintf(L"Connect fail!\n");
+	//	return 0;
+	//}
+
+	//Staff lstaff;
+	//WCHAR wcsStaffNum[50], wcsPassword[50];
+	//wscanf(L"%s %s", wcsStaffNum, wcsPassword);
+	//lstaff.SetStaffNum(wcsStaffNum);
+	//lstaff.SetPassword(wcsPassword);
+
+	//// test login
+	//if ((nRetCode = db.Login(lstaff) < 0))
+	//{
+	//	WCHAR wcsMsg[1024];
+	//	wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
+	//	wprintf(L"%ls", db.GetErrorMsg());
+	//	return -1;
+	//}
+	//else
+	//{
+	//	PrintResultSet(set);
+	//	PrintStaff(lstaff);
+	//}
+
+	//// add Coal Info
+	//int id = 0;
+	//CoalInfo ci;
+	//ci.SetAssayCode(L"12314");
+	//if( (nRetCode = db.AddCoalInfo(ci, &id)) < 0)
+	//{
+	//	wprintf(L"add coal error");
+	//	return 0;
+	//}
+
+	//// test add staff
+	//Staff lNewStaff;
+	//lNewStaff.SetStaffNum(L"041030234");
+	//lNewStaff.SetStaffName(L"NewStaff");
+	//lNewStaff.SetStaffBirthday(2013, 11, 9);
+	//lNewStaff.SetStaffSex(SQLSex::Male);
+	//lNewStaff.SetPassword(L"w36308458");
+	//lNewStaff.SetPermission(L"B");
+	//lNewStaff.SetPosition(L"一般员工");
+	//if ((nRetCode = db.AddStaff(lNewStaff)) < 0)
+	//{
+	//	WCHAR wcsMsg[1024];
+	//	wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
+	//	wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
+	//}
+	//else
+	//{
+	//	wprintf(L"ADD SUCCESS\n");
+	//}
+
+	//if ((nRetCode = db.DeleteStaff(L"041030234")) < 0)
+	//{
+	//	WCHAR wcsMsg[1024];
+	//	wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
+	//	wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
+	//}
+	//else
+	//{
+	//	wprintf(L"DELETE SUCCESS\n");
+	//}
+
+	//StaffArray arrStaffs;
+	//if ((nRetCode = db.SelectAllStaff(arrStaffs)) < 0)
+	//{
+	//	WCHAR wcsMsg[1024];
+	//	wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
+	//	wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
+	//}
+	//else
+	//{
+	//	wprintf(L"SELECT SUCCESS\n");
+	//}
+
+	// Access 
+	//if((nRetCode = db.Connect(L"Driver={Microsoft Access Driver (*.mdb)}; \
+	//						   Dbq=D:\\长沙开源\\量热仪\\当前运行5E-2500A\\5E-ACNew\\Data\\win5e.Mdb;\
+	//						   charset=gbk")) < 0)
+	//{
+	//	wprintf(L"Connect fail!\n");
+	//	return 0;
+	//}
+
+	//if((nRetCode = db.ExecuteQuery(L"SELECT top 5 [Number],[Standard] FROM Win5eMdb;", &set)) < 0)
+	//{
+	//	
+	//}
+	//if((nRetCode = db.Connect(L"Driver={Microsoft Access Driver (*.mdb)}; \
+	//						   Dbq=D:\\长沙开源\\测硫仪\\新建文件夹\\Data\\KY8SA.mdb;")) < 0)
+	//{
+	//	wprintf(L"Connect fail!\n");
+	//	return 0;
+	//}
+
+	//if((nRetCode = db.ExecuteQuery(L"SELECT top 5 [试样编号],[试样名称] FROM AnalysisData;", &set)) < 0)
+	//{
+	//	
+	//}
+
+	if((nRetCode = db.Connect(L"SQL Server", 
+							  L"dasfaf", 
+							  L"CoalAssay", 
+							  L"sa", 
+							  L"Xzd091217")) < 0)
 	{
 		wprintf(L"Connect fail!\n");
 		return 0;
 	}
-	//if(db.Login(_T("1232"), _T("afdg23")))
-	//{
-	//	printf("Login Success!");
-	//}
-	//else
-	//{
-	//	wprintf(_T("%s"), db.GetMsg());
-	//}
-	Staff lstaff;
-	//lstaff.strStaffNum = new WCHAR[wcslen(_T("1232")) + 1];
-	//lstaff.strPassword = new WCHAR[wcslen(_T("afdg23")) + 1];
-	//wcscpy((WCHAR*)lstaff.strStaffNum, _T("1232"));
-	//wcscpy((WCHAR*)lstaff.strPassword, _T("afdg23"));
-	WCHAR wcsStaffNum[50], wcsPassword[50];
-	//lstaff.SetStaffNum(L"041030233");
-	//lstaff.SetPassword(L"w36308458");
-	wscanf(L"%s %s", wcsStaffNum, wcsPassword);
-	lstaff.SetStaffNum(wcsStaffNum);
-	lstaff.SetPassword(wcsPassword);
-
-	// test login
-	if ((nRetCode = db.Login(lstaff) < 0))
-	{
-		WCHAR wcsMsg[1024];
-		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"%ls", db.GetErrorMsg());
-		return -1;
-	}
-	else
-	{
-		PrintResultSet(set);
-		PrintStaff(lstaff);
-	}
-
-	// test add staff
-	Staff lNewStaff;
-	lNewStaff.SetStaffNum(L"041030234");
-	lNewStaff.SetStaffName(L"NewStaff");
-	lNewStaff.SetStaffBirthday(2013, 11, 9);
-	lNewStaff.SetStaffSex(SQLSex::Male);
-	lNewStaff.SetPassword(L"w36308458");
-	lNewStaff.SetPermission(L"B");
-	lNewStaff.SetPosition(L"一般员工");
-	if ((nRetCode = db.AddStaff(lNewStaff)) < 0)
-	{
-		WCHAR wcsMsg[1024];
-		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
-	}
-	else
-	{
-		wprintf(L"ADD SUCCESS\n");
-	}
-
-	if ((nRetCode = db.DeleteStaff(L"041030234")) < 0)
-	{
-		WCHAR wcsMsg[1024];
-		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
-	}
-	else
-	{
-		wprintf(L"DELETE SUCCESS\n");
-	}
-
-	//vector<Staff> arrStaffs;
-	StaffArray arrStaffs;
-	if ((nRetCode = db.SelectAllStaff(arrStaffs)) < 0)
-	{
-		WCHAR wcsMsg[1024];
-		wsprintf(wcsMsg, L"%ls", db.GetErrorMsg());
-		wprintf(L"ERROR : %ls\n", db.GetErrorMsg());
-	}
-	else
-	{
-		wprintf(L"SELECT SUCCESS\n");
-	}
-
 	getchar();
 	return 0;
 }

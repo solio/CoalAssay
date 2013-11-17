@@ -8,8 +8,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj",
 		{B845F9CE-CF9A-45C3-8B6B-C8F08FCB6EEB} = {B845F9CE-CF9A-45C3-8B6B-C8F08FCB6EEB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoalManagementCtrl", "CoalManagementCtrl\CoalManagementCtrl.vcxproj", "{FA89D958-7B23-431F-AE2E-E7A3EF189F93}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -29,12 +27,6 @@ Global
 		{F3F0A4EE-DCE7-4472-9F84-373AE30DEC5A}.Release|Win32.Build.0 = Release|Win32
 		{F3F0A4EE-DCE7-4472-9F84-373AE30DEC5A}.Template|Win32.ActiveCfg = Release|Win32
 		{F3F0A4EE-DCE7-4472-9F84-373AE30DEC5A}.Template|Win32.Build.0 = Release|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Debug|Win32.Build.0 = Debug|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Release|Win32.ActiveCfg = Release|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Release|Win32.Build.0 = Release|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Template|Win32.ActiveCfg = Template|Win32
-		{FA89D958-7B23-431F-AE2E-E7A3EF189F93}.Template|Win32.Build.0 = Template|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

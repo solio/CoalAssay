@@ -72,6 +72,7 @@
     <ClCompile Include="OdbcDriver.cpp" />
     <ClCompile Include="QueryBuilder.cpp" />
     <ClCompile Include="SqlServerQueryBuilder.cpp" />
+    <ClCompile Include="Task.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoalAssayDB.h" />
@@ -81,6 +82,7 @@
     <ClInclude Include="OdbcDriver.h" />
     <ClInclude Include="QueryBuilder.h" />
     <ClInclude Include="SqlServerQueryBuilder.h" />
+    <ClInclude Include="Task.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

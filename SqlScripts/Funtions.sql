@@ -104,6 +104,7 @@ BEGIN
 END
 GO
 
+--用户相关存储过程--
 CREATE PROCEDURE [dbo].Login 
 	@StaffNum nvarchar(50),
 	@Password nvarchar(50)
@@ -301,5 +302,45 @@ BEGIN
 		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
 		EXEC [dbo].Track @Token,'SELECT','SelectAllStaff', 'ERROR Permission Denied'
 	END
+END
+GO
+
+--CoalInfo相关存储--
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[AddCoalInfo]'))
+BEGIN
+	DROP PROCEDURE [dbo].AddCoalInfo
+END
+GO
+
+CREATE PROCEDURE [dbo].AddCoalInfo
+	@Token varchar(50)
+	,@CoalLotNum	nvarchar(20)
+	,@AssayCode	nvarchar(20)
+	,@AssayDate	datetime
+	,@SampleDate	datetime
+	,@AssayType	tinyint
+	,@AssayStaff	nvarchar(20)
+	,@SampleStaff	nvarchar(20)
+	,@StageName	nvarchar(50)
+	,@WorksName	nvarchar(50)
+AS
+BEGIN
+	IF [dbo].IsAdmin(@Token) = 1
+	BEGIN
+		INSERT INTO [CoalAssay].[dbo].[CoalInfo]
+			([CoalLotNum],[AssayCode],[AssayDate],[SampleDate],[AssayType],
+			 [AssayStaff],[SampleStaff],[StageName],[WorksName])
+		VALUES
+		   (@CoalLotNum,@AssayCode,@AssayDate,@SampleDate,@AssayType
+		   ,@AssayStaff,@SampleStaff,@StageName,@WorksName)		
+		EXEC [dbo].Track @Token,'INSERT','AddCoalInfo', 'SUCCESS'
+	END
+	ELSE
+	BEGIN
+		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
+		EXEC [dbo].Track @Token,'INSERT','AddCoalInfo', 'ERROR Permission Denied'
+	END	
 END
 GO

@@ -33,6 +33,9 @@
     <ClCompile Include="DataTypes.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Task.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OdbcDriver.h">
@@ -54,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CoalAssayDB.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Task.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
