@@ -2,6 +2,7 @@
 #define COALASSAYDB_HEADER
 
 #include "OdbcDriver.h"
+#include "Task.h"
 #include "SqlServerQueryBuilder.h"
 
 class SOLIOEXPORT CoalAssayDB : public OdbcDriver, public SqlServerQueryBuilder
@@ -25,7 +26,10 @@ public:
 	int EditUser(Staff& lStaff);
 	int DeleteStaff(LPCWSTR lpcsStaffNum);
 	int SelectAllStaff(StaffArray& arrStaff);
-
+	int SelectUnChecked(vector<CoalInfo>& arrCoal
+						, vector<MergeTable>& arrMerge);
+	int CorrespondingConnect(DeviceType enumType
+							 , LPCWSTR lpszConn);
 	int CorrespondingConnect(DeviceType enumType,
 							 LPCWSTR lpszDriver,
 							 LPCWSTR lpszServer,
@@ -34,9 +38,22 @@ public:
 							 LPCWSTR lpszPwd);
 	int AddCoalInfo(const CoalInfo& lCoalInfo, int *lpnCoalId);	
 	int AddCorrespondingBlank(const AssayTask& oTask);
+	int AddCorresponding(AssayTask& loTask, AssayTask *lpTask);
+	int SetCorresponding(const DeviceType& enumDest, vector<LPVOID> arrDataObjects);
+	//int AuditCorresponding(AssayTask& loTask);
 	BOOL IsCorrespondingConnected(const DeviceType enumType);
 
-	int CreateNewTask(const AssayTask& oTask);
+	int ExecuteTask(AssayTask& oTask, AssayTask** lppTask);
+	int AuditTask(LPCWSTR wcsAssayCode, int lnState);
+
+	int Search(vector<CoalInfo>& larrci
+			   , vector<MergeTable>& larrmt
+			   , LPCWSTR wcsAssayCode);
+	int Search(vector<CoalInfo>& larrci
+			   , vector<MergeTable>& larrmt
+			   , LPCWSTR wcsAssayStaff			   
+			   , const TIMESTAMP_STRUCT *tsBegin
+			   , const TIMESTAMP_STRUCT *tsEnd);
 	
 	void SetBindingSet(SQLResult *lpSet)
 	{
@@ -54,5 +71,49 @@ protected:
 	void GetStaff(Staff& lStaff, 
 				  const SQLResult* lpSet, 
 				  int nRowIndex);
+	void GetCoal(CoalInfo& lCoal
+				 , const SQLResult *lpSet
+				 , int nRowIndex);
+	void GetAshFusionPoint(AshFusionPoint_t& lash, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+	void GetCaloriMeter(CaloriMeter_t& lStaff, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+	void GetElementAnalyzer(ElementAnalyzer_t& lea, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+	void GetLightWaveMeter(LightWaveMeter_t& llwm, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+	void GetSulfurDetector(SulfurDetector_t& lsd, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+	void GetWorkPointInstrument(WorkPointInstrument_t& lwpi, 
+				  const SQLResult* lpSet, 
+				  int nRowIndex);
+
+	int AddAshFusionPoint(AshFusionPoint_t& lash);
+	int AddCaloriMeter(CaloriMeter_t& lpCm);
+	int AddElementAnalyzer(ElementAnalyzer_t& lea);
+	int AddLightWaveMeter(LightWaveMeter_t& llwm);
+	int AddSulfurDetector(SulfurDetector_t& lsd);
+	int AddWorkPointInstrument(WorkPointInstrument_t& lwpi);
+
+	int SetAshFusionPoint(AshFusionPoint_t& lash);
+	int SetCaloriMeter(CaloriMeter_t& lpCm);
+	int SetElementAnalyzer(ElementAnalyzer_t& lea);
+	int SetLightWaveMeter(LightWaveMeter_t& llwm);
+	int SetSulfurDetector(SulfurDetector_t& lsd);
+	int SetWorkPointInstrument(WorkPointInstrument_t& lwpi);
 };
+
+typedef struct WatchThreadParam_t
+{
+	CoalAssayDB *pCoalAssayDB;
+	AssayTask	*pAssayTask;
+	AssayTask	*pAssayResult;
+}WatcherThreadParam_t;
+
+DWORD WINAPI WatchAssayTaskProc(LPVOID lpParam);
 #endif

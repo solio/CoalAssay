@@ -20,7 +20,7 @@
 using namespace std;
 
 #define PARAMOUT  
-
+#define TIMEFORMAT L"%4d-%2d-%2d"
 /************************************************/
 /*
 /* Error defination
@@ -31,6 +31,7 @@ using namespace std;
 #define SQL_NONBINDING			SQL_ERROR_BASE - 2
 #define SQL_NONDATA				SQL_ERROR_BASE - 3
 #define SQL_NOAFFECTED			SQL_ERROR_BASE - 4
+#define SQL_BADQUERY			SQL_ERROR_BASE - 5
 #define LOGIC_BASE				-2500
 #define LOGIC_USERERROR			LOGIC_BASE - 1
 #define LOGIC_PERMISSIONDENIED	LOGIC_BASE - 2
@@ -40,5 +41,6 @@ using namespace std;
 #define LOGIC_PASSWORDSIMPLE	LOGIC_BASE - 6
 #define LOGIC_NOLOGINED			LOGIC_BASE - 7
 #define LOGIC_CREATETASKFAIL	LOGIC_BASE - 8
+#define LOGIC_ERRORTASK			LOGIC_BASE - 9
 
 #endif

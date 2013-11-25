@@ -134,6 +134,7 @@ CoalInfo::CoalInfo()
 	memset(m_wcsSampleStaff, 0, sizeof(m_wcsSampleStaff));
 	memset(m_wcsStageName,	0, sizeof(m_wcsStageName));
 	memset(m_wcsWorksName,	0, sizeof(m_wcsWorksName));
+	memset(&m_nState,	0, sizeof(m_nState));
 
 	m_tsAssayDate.year = 1970;
 	m_tsAssayDate.month = 1;
@@ -194,6 +195,11 @@ void CoalInfo::SetWorksName(LPCWSTR lwcsWorksName)
 	wcscpy(m_wcsWorksName, lwcsWorksName);
 }
 
+void CoalInfo::SetState(int lnState)
+{
+	this->m_nState = lnState;
+}
+
 LPCWSTR CoalInfo::GetCoalLotNum() const
 {
 	return this->m_wcsCoalLotNum;
@@ -237,4 +243,9 @@ LPCWSTR CoalInfo::GetStageName() const
 LPCWSTR CoalInfo::GetWorksName() const
 {
 	return this->m_wcsWorksName;
+}
+
+int CoalInfo::GetState() const
+{
+	return this->m_nState;
 }

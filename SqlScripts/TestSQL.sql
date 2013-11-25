@@ -131,4 +131,43 @@ USE CoalAssay
 --EXEC [dbo].DeleteStaff '41DF61F07564046C179D477BF4694DAD', '041030234'
 
 /** 测试跟踪操作**/
-EXEC [dbo].Track 'token test', 'SELECT', 'Login', 'SUCCESS'
+--EXEC [dbo].Track 'token test', 'SELECT', 'Login', 'SUCCESS'
+
+/** 煤样查询**/
+--EXEC [dbo].SearchCoal 'EA849D4CAF260F450A357036DED1351E','AssayCode','12314','','',''
+--EXEC [dbo].SearchCoal 'EA849D4CAF260F450A357036DED1351E','Staff','夏治道','','',''
+
+--SELECT Top 1	 
+--	[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+--	,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+--	,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+--	,[Had]
+--	,[Mar]
+--	,[St_ad],[St_d]
+--	,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+--FROM
+--	[CoalInfo] --WHERE [AssayCode]='12314'
+--LEFT JOIN [CaloriMeter] ON [CoalInfo].AssayCode='12314' AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+--LEFT JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+--LEFT JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+--LEFT JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+--LEFT JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+--LEFT JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode
+
+--SELECT
+--	[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+--	,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+--	--,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+--	,[Had]
+--	,[Mar]
+--	,[St_ad],[St_d]
+--	--,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+--FROM
+--	[CoalInfo] 
+--	--WHERE [CoalInfo].AssayStaff='夏治道'
+--	INNER JOIN [CaloriMeter] ON [CoalInfo].AssayStaff='夏治道' AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+--	--JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+--	INNER JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+--	INNER JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+--	INNER JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+--	--JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode		

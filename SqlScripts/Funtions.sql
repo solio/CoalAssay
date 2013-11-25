@@ -344,3 +344,203 @@ BEGIN
 	END	
 END
 GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[SelectUnChecked]'))
+BEGIN
+	DROP PROCEDURE [dbo].SelectUnChecked
+END
+GO
+
+CREATE PROCEDURE [dbo].SelectUnChecked
+	@Token varchar(50)
+AS
+BEGIN
+	IF [dbo].IsAdmin(@Token) = 1
+	BEGIN
+		SELECT 
+			 [CoalLotNum],[AssayCode],[AssayDate],[SampleDate],[AssayType],
+			 [AssayStaff],[SampleStaff],[StageName],[WorksName]
+		FROM
+			[CoalInfo]
+		WHERE [State] = 0
+		EXEC [dbo].Track @Token,'SELECT','SelectUnChecked', 'SUCCESS'
+	END
+	ELSE
+	BEGIN
+		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
+		EXEC [dbo].Track @Token,'SELECT','SelectUnChecked', 'ERROR Permission Denied'
+	END	
+END
+GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[CheckTask]'))
+BEGIN
+	DROP PROCEDURE [dbo].CheckTask
+END
+GO
+
+CREATE PROCEDURE [dbo].CheckTask
+	@Token varchar(50)
+	,@wcsAssayCode	nvarchar(20)
+	,@State	int		
+AS
+BEGIN
+	IF [dbo].IsAdmin(@Token) = 1
+	BEGIN
+		UPDATE [CoalInfo] SET [State] = @State WHERE [AssayCode] = @wcsAssayCode 
+		EXEC [dbo].Track @Token,'UPDATE','CheckTask', 'SUCCESS'
+	END
+	ELSE
+	BEGIN
+		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
+		EXEC [dbo].Track @Token,'UPDATE','CheckTask', 'ERROR Permission Denied'
+	END	
+END
+GO
+
+IF Exists (
+	SELECT * FROM [sys].[objects] 
+	WHERE object_id = OBJECT_ID(N'[dbo].[SearchCoal]'))
+BEGIN
+	DROP PROCEDURE [dbo].SearchCoal
+END
+GO
+
+CREATE PROCEDURE [dbo].SearchCoal
+	@Token varchar(50)
+	,@Condition nvarchar(20)
+	,@AssayCode	nvarchar(20)
+	,@AssayStaff nvarchar(20)
+	,@BeginDate date
+	,@EndDate date
+AS
+BEGIN
+	IF [dbo].IsAdmin(@Token) = 1
+	BEGIN
+		IF @Condition = 'AssayCode'
+		BEGIN
+			SELECT 
+				[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],
+				[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],
+				[StageName],[WorksName]
+			FROM [CoalInfo] WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+			FROM CaloriMeter WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+			FROM AshFusionPoint WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[Had]
+			FROM ElementAnalyzer WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[Mar]
+			FROM LightWaveMeter WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[St_ad],[St_d]
+			FROM SulfurDetector WHERE [AssayCode] = @AssayCode
+			SELECT 
+				[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+			FROM WorkPointInstrument WHERE [AssayCode] = @AssayCode												
+					
+			--SELECT Top 1	 
+			--	[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+			--	,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+			--	,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+			--	,[Had]
+			--	,[Mar]
+			--	,[St_ad],[St_d]
+			--	,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+			--FROM
+			--	[CoalInfo]
+			--	LEFT JOIN [CaloriMeter] ON [CoalInfo].AssayCode=@AssayCode AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+			--	LEFT JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+			--	LEFT JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+			--	LEFT JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+			--	LEFT JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+			--	LEFT JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode
+			EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'SUCCESS'			
+		END
+		ELSE IF @Condition = 'Staff'			
+		BEGIN
+			SELECT
+				[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+				,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+				,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+				,[Had]
+				,[Mar]
+				,[St_ad],[St_d]
+				,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+			FROM
+				[CoalInfo] 
+				LEFT JOIN [CaloriMeter] ON [CoalInfo].AssayStaff=@AssayStaff AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+				LEFT JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+				LEFT JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+				LEFT JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+				LEFT JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+				LEFT JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode		
+			EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'SUCCESS'			
+		END
+		ELSE IF @Condition = 'Date'			
+		BEGIN
+			SELECT
+				[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+				,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+				,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+				,[Had]
+				,[Mar]
+				,[St_ad],[St_d]
+				,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+			FROM
+				[CoalInfo]
+				LEFT JOIN [CaloriMeter] ON [CoalInfo].AssayDate<=@EndDate 
+						  AND [CoalInfo].AssayDate >= @BeginDate 
+						  AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+				LEFT JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+				LEFT JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+				LEFT JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+				LEFT JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+				LEFT JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode				
+			EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'SUCCESS'
+		END
+		ELSE IF @Condition = 'StaffAndDate'
+		BEGIN
+			SELECT 
+				[CoalLotNum],[CoalInfo].[AssayCode],[CoalInfo].[AssayDate],[SampleDate],[AssayType],[CoalInfo].[AssayStaff],[SampleStaff],[StageName],[WorksName]
+				,[Qb_ad],[Qgr_d],[Qgr_a],[Qnet_ar]
+				,[AshFusionT1],[AshFusionT2],[AshFusionT3],[AshFusionT4]
+				,[Had]
+				,[Mar]
+				,[St_ad],[St_d]
+				,[Vd],[Vad],[Var],[Vdaf],[Mad],[Aad],[Aar]
+			FROM
+				[CoalInfo]
+				LEFT JOIN [CaloriMeter] ON 
+						  [CoalInfo].AssayStaff = @AssayStaff
+						  AND [CoalInfo].AssayDate<=@EndDate 
+						  AND [CoalInfo].AssayDate >= @BeginDate 
+						  AND [CoalInfo].AssayCode=[CaloriMeter].AssayCode
+				LEFT JOIN [AshFusionPoint] ON [CoalInfo].AssayCode=[AshFusionPoint].AssayCode
+				LEFT JOIN [ElementAnalyzer] ON [CoalInfo].AssayCode=[ElementAnalyzer].AssayCode
+				LEFT JOIN [LightWaveMeter] ON [CoalInfo].AssayCode=[LightWaveMeter].AssayCode
+				LEFT JOIN [SulfurDetector] ON [CoalInfo].AssayCode=[SulfurDetector].AssayCode
+				LEFT JOIN [WorkPointInstrument] ON [CoalInfo].AssayCode=[WorkPointInstrument].AssayCode
+			EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'SUCCESS'
+		END
+		ELSE
+		BEGIN
+			EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'ERROR Bad Query'
+			
+		END		
+	END
+	ELSE
+	BEGIN
+		SELECT 'ERROR Permission Denied' AS SELECTALLRESULT
+		EXEC [dbo].Track @Token,'SELECT','SearchCoal', 'ERROR Permission Denied'
+	END	
+END
+GO

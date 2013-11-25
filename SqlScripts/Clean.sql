@@ -1,11 +1,9 @@
-IF Exists (
-	SELECT * FROM [sys].[objects] 
-	WHERE object_id = OBJECT_ID(N'[dbo].[Login]') AND type in (N'FN', N'IF', N'TF', N'FS', N'FT'))
-BEGIN
-	PRINT 'FUNCTINO Login uninstall'
-	DROP FUNCTION [dbo].Login
-END
-ELSE
-BEGIN
-	PRINT 'FUNCTION Login not exists'
-END
+USE CoalAssay
+
+DELETE FROM [CoalInfo] WHERE [ID] IN (SELECT MAX([ID]) FROM [CoalInfo])
+DELETE FROM [CaloriMeter] WHERE [ID] IN (SELECT MAX([ID]) FROM [CaloriMeter])
+DELETE FROM [AshFusionPoint] WHERE [ID] IN (SELECT MAX([ID]) FROM [AshFusionPoint])
+DELETE FROM [ElementAnalyzer] WHERE [ID] IN (SELECT MAX([ID]) FROM [ElementAnalyzer])
+DELETE FROM [LightWaveMeter] WHERE [ID] IN (SELECT MAX([ID]) FROM [LightWaveMeter])
+DELETE FROM [SulfurDetector] WHERE [ID] IN (SELECT MAX([ID]) FROM [SulfurDetector])
+DELETE FROM [WorkPointInstrument] WHERE [ID] IN (SELECT MAX([ID]) FROM [WorkPointInstrument])

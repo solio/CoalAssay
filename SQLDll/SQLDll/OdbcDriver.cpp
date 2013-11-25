@@ -9,6 +9,18 @@ using namespace std;
 OdbcDriver::OdbcDriver(void) :
 	m_bConnected(false)
 {
+	Initial();
+}
+
+
+OdbcDriver::~OdbcDriver(void)
+{
+	Disconnect();
+	FreeResult();
+}
+
+void OdbcDriver::Initial()
+{
 	this->m_hEnvironment = NULL;
 	this->m_hOdbc = NULL;
 	this->m_hStatement = NULL;
@@ -34,13 +46,6 @@ OdbcDriver::OdbcDriver(void) :
         throw exception("Unable to allocate odbc driver connection");
 		exit(-1);				
 	}
-}
-
-
-OdbcDriver::~OdbcDriver(void)
-{
-	Disconnect();
-	FreeResult();
 }
 
 int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
@@ -69,6 +74,34 @@ int OdbcDriver::Connect(LPCWSTR lpszConnectedString)
 		m_bConnected = true;
 	}
 	return retVal;
+}
+
+int OdbcDriver::Disconnect()
+{
+    if (m_hStatement)
+    {
+        SQLFreeHandle(SQL_HANDLE_STMT, m_hStatement);
+		m_hStatement = NULL;
+    }
+
+    if (m_hOdbc)
+    {
+        SQLDisconnect(m_hOdbc);
+        SQLFreeHandle(SQL_HANDLE_DBC, m_hOdbc);
+		m_hOdbc = NULL;
+    }
+
+    if (m_hEnvironment)
+    {
+        SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
+		m_hEnvironment = NULL;
+    }
+	if(m_pcswQueryString)
+	{
+		delete m_pcswQueryString;
+		m_pcswQueryString;
+	}
+	return 0;
 }
 
 int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
@@ -133,53 +166,18 @@ int OdbcDriver::ExecuteQuery(LPCWSTR lpszQueryString, SQLResult* lpSqlResult)
 		{
 			char msg[1024] = "";
 			sprintf(msg, "Unexpected return code %d!", RetCode);
-			throw exception(msg);
+			//throw exception(msg);
 		}
     }
 
-	SQLFreeStmt(m_hStatement, SQL_CLOSE);
+ 	SQLFreeStmt(m_hStatement, SQL_CLOSE);
 	m_hStatement = NULL;
 
 	return RetCode;
 }
 
-int OdbcDriver::Disconnect()
-{
-    if (m_hStatement)
-    {
-        SQLFreeHandle(SQL_HANDLE_STMT, m_hStatement);
-		m_hStatement = NULL;
-    }
-
-    if (m_hOdbc)
-    {
-        SQLDisconnect(m_hOdbc);
-        SQLFreeHandle(SQL_HANDLE_DBC, m_hOdbc);
-		m_hOdbc = NULL;
-    }
-
-    if (m_hEnvironment)
-    {
-        SQLFreeHandle(SQL_HANDLE_ENV, m_hEnvironment);
-		m_hEnvironment = NULL;
-    }
-	if(m_pcswQueryString)
-	{
-		delete m_pcswQueryString;
-		m_pcswQueryString;
-	}
-	return 0;
-}
-
 int OdbcDriver::Connect(SQLConnection lsqlConn)
 {
-	int nLen = 0;
-	nLen += wcslen(lsqlConn.strDBName) + 1;
-	nLen += wcslen(lsqlConn.strServer) + 1;
-	nLen += wcslen(lsqlConn.strDriver) + 1;
-	nLen += wcslen(lsqlConn.strUserId) + 1;
-	nLen += wcslen(lsqlConn.strPassword) + 1;
-
 	WCHAR szConnStr[1024] = _T("");
 	wsprintf(szConnStr, L"Driver={%s};Server=%s;Database=%s;Uid=%s;Pwd=%s",
 			 lsqlConn.strDriver,
@@ -192,10 +190,10 @@ int OdbcDriver::Connect(SQLConnection lsqlConn)
 }
 
 int OdbcDriver::Connect(LPCWSTR lpszDriver,
-	LPCWSTR lpszServer,
-	LPCWSTR lpszDBName,
-	LPCWSTR lpszUid,
-	LPCWSTR lpszPwd)
+						LPCWSTR lpszServer,
+						LPCWSTR lpszDBName,
+						LPCWSTR lpszUid,
+						LPCWSTR lpszPwd)
 {
 	WCHAR szConnStr[1024] = _T("");
 	wsprintf(szConnStr, L"Driver={%s};Server=%s;Database=%s;Uid=%s;Pwd=%s",

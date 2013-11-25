@@ -99,17 +99,18 @@ public:
 	void SetSampleStaff(LPCWSTR lwcsSampleStaff);
 	void SetStageName(LPCWSTR lwcsStageName);
 	void SetWorksName(LPCWSTR lwcsWorksName);
+	void SetState(int lnState);
 
 	LPCWSTR GetCoalLotNum() const;
 	LPCWSTR GetAssayCode() const;
 	const TIMESTAMP_STRUCT GetAssayDate() const;
 	const TIMESTAMP_STRUCT GetSampleDate() const;
 	const AssayType	GetAssayType() const;
-	LPCWSTR GetAssayStaff() const;
+	LPCWSTR GetAssayStaff() const; 
 	LPCWSTR GetSampleStaff() const;
 	LPCWSTR GetStageName() const;
 	LPCWSTR GetWorksName() const;
-
+	int GetState() const;
 private:
 	WCHAR m_wcsCoalLotNum[20];
 	WCHAR m_wcsAssayCode[20];
@@ -120,6 +121,7 @@ private:
 	WCHAR m_wcsSampleStaff[20];
 	WCHAR m_wcsStageName[50];
 	WCHAR m_wcsWorksName[50];
+	int	m_nState;								//0 未审核 1已审核 2可审核 3未通过
 };
 
 enum SOLIOEXPORT DeviceType {	AshFusionPoint = 0		//"智能灰熔点分析仪"
@@ -132,24 +134,22 @@ enum SOLIOEXPORT DeviceType {	AshFusionPoint = 0		//"智能灰熔点分析仪"
 
 typedef struct SOLIOEXPORT AshFusionPoint_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
+	WCHAR m_szAssayStaff[50];
 	double m_dAshFusionT1;			// numeric(8, 2)
 	double m_dAshFusionT2;			// numeric(8, 2)
 	double m_dAshFusionT3;			// numeric(8, 2)
-	double m_dAshFusionT4;			// numeric(8, 2)
+	double m_dAshFusionT4;			// numeric(8, 2
 }AshFusionPoint_t;
 
 typedef struct SOLIOEXPORT CaloriMeter_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
+	WCHAR m_szAssayStaff[50];
 	double m_dQb_ad;				//numeric(8, 3) NOT NULL,
 	double m_dQgr_d;				//numeric(8, 3) NOT NULL,
 	double m_dQgr_a;				//numeric(8, 3) NOT NULL,
@@ -158,72 +158,56 @@ public:
 
 typedef struct SOLIOEXPORT ElementAnalyzer_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
-	double m_dHad;					// numeric(8, 2)
+	WCHAR m_szAssayStaff[50];
+	double m_dHad;					//numeric(8, 2)
 }ElementAnalyzer_t;
 
 typedef struct SOLIOEXPORT LightWaveMeter_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
-	double m_dMar;					//[numeric](8, 2) NOT NULL,
-	double m_dMad;					//[numeric](8, 2) NOT NULL,
+	WCHAR m_szAssayStaff[50];
+	double m_dMar;					//[Moisture] [numeric](8, 2) NOT NULL,
 }LightWaveMeter_t;
 
 typedef struct SOLIOEXPORT SulfurDetector_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
-	double m_dSt_ad;				//[numeric](8, 2) NOT NULL,
-	double m_dSt_d;					//[numeric](8, 2) NOT NULL,
+	WCHAR m_szAssayStaff[50];
+	double m_dSt_ad;				//空干基全硫[numeric](8, 2) NOT NULL,
+	double m_dSt_d;					//干基全硫[numeric](8, 2) NOT NULL,
 }SulfurDetector_t;
 
 typedef struct SOLIOEXPORT WorkPointInstrument_t
 {
-public:
-	int m_nAssayID;
+	WCHAR m_szAssayCode[50];
 	int m_nDeviceID;
 	TIMESTAMP_STRUCT m_tsAssayDate;
-	int m_nAssayStaffID;
+	WCHAR m_szAssayStaff[50];
+	double m_dAd;					//numeric(8, 2) NOT NULL,
 	double m_dVd;					//numeric(8, 2) NOT NULL,
 	double m_dVad;					//numeric(8, 2) NOT NULL,
 	double m_dVar;					//numeric(8, 2) NOT NULL,
 	double m_dVdaf;					//numeric(8, 2) NOT NULL,
-	double m_dMar;					//numeric(8, 2) NOT NULL,
 	double m_dMad;					//numeric(8, 2) NOT NULL,
 	double m_dAad;					//numeric(8, 2) NOT NULL,
 	double m_dAar;					//numeric(8, 2) NOT NULL,
 }WorkPointInstrument_t;
 
-class SOLIOEXPORT AssayTask
+typedef struct SOLIOEXPORT MergeTable
 {
-public:
-	AssayTask()
-	{
-		ThreadHandle = NULL;
-		ThreadId = -1;  
-		TurnsElapse = 2 * 60 * 1000;
-		Finish = FALSE;
-	}
-public:
-	CoalInfo				CoalInfo;
-	DeviceType				CurrentDevice;
-	vector<DeviceType>		Devices;	
-	vector<wstring>			Cols;
-	vector<vector<wstring>> Rows;
-	HANDLE					ThreadHandle;
-	DWORD					ThreadId;
-	DWORD					TurnsElapse;
-	BOOL					Finish;
-};
+	AshFusionPoint_t	m_oAshFusionPoint;
+	CaloriMeter_t		m_oCaloriMeter;
+	ElementAnalyzer_t	m_oElementAnalyzer;
+	LightWaveMeter_t	m_oLightWaveMeter;
+	SulfurDetector_t	m_oSulfurDetector;
+	WorkPointInstrument_t	m_oWorkPointInstrument;
+}MergeTable;
+
 #endif
