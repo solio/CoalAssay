@@ -1,0 +1,54 @@
+﻿生成启动时间为 2013/11/23 17:38:52。
+     1>项目“H:\project\CoalAssay\SQLDll\SimulationInput\SimulationInput.vcxproj”在节点 2 上(rebuild 个目标)。
+     1>_PrepareForClean:
+         正在删除文件“Debug\SimulationInput.lastbuildstate”。
+       InitializeBuildStatus:
+         正在创建“Debug\SimulationInput.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         d:\VS2010\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Simulation.cpp
+         Simulation.cpp
+     1>h:\project\coalassay\sqldll\sqldll\datatypes.h(32): warning C4251: “SQLResult::szMsg”: class“std::basic_string<_Elem,_Traits,_Ax>”需要有 dll 接口由 struct“SQLResult”的客户端使用
+                 with
+                 [
+                     _Elem=wchar_t,
+                     _Traits=std::char_traits<wchar_t>,
+                     _Ax=std::allocator<wchar_t>
+                 ]
+     1>h:\project\coalassay\sqldll\sqldll\datatypes.h(34): warning C4251: “SQLResult::Cols”: class“std::vector<_Ty>”需要有 dll 接口由 struct“SQLResult”的客户端使用
+                 with
+                 [
+                     _Ty=std::wstring
+                 ]
+     1>h:\project\coalassay\sqldll\sqldll\datatypes.h(35): warning C4251: “SQLResult::Rows”: class“std::vector<_Ty>”需要有 dll 接口由 struct“SQLResult”的客户端使用
+                 with
+                 [
+                     _Ty=std::vector<std::wstring>
+                 ]
+     1>h:\project\coalassay\sqldll\sqldll\idriver.h(36): warning C4996: 'wcscpy': This function or variable may be unsafe. Consider using wcscpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 d:\vs2010\vc\include\string.h(283) : 参见“wcscpy”的声明
+     1>h:\project\coalassay\sqldll\sqldll\task.h(36): warning C4251: “AssayTask::Devices”: class“std::vector<_Ty>”需要有 dll 接口由 class“AssayTask”的客户端使用
+                 with
+                 [
+                     _Ty=DeviceType
+                 ]
+     1>h:\project\coalassay\sqldll\sqldll\task.h(38): warning C4251: “AssayTask::DataObjects”: class“std::vector<_Ty>”需要有 dll 接口由 class“AssayTask”的客户端使用
+                 with
+                 [
+                     _Ty=PVOID
+                 ]
+     1>h:\project\coalassay\sqldll\sqldll\task.h(19): warning C4018: “<”: 有符号/无符号不匹配
+     1>h:\project\coalassay\sqldll\sqldll\coalassaydb.h(68): warning C4996: 'wcscpy': This function or variable may be unsafe. Consider using wcscpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 d:\vs2010\vc\include\string.h(283) : 参见“wcscpy”的声明
+       Link:
+         d:\VS2010\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\project\CoalAssay\SQLDll\Debug\SimulationInput.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\SimulationInput.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\project\CoalAssay\SQLDll\Debug\SimulationInput.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\project\CoalAssay\SQLDll\Debug\SimulationInput.lib" /MACHINE:X86 Debug\Simulation.obj
+         SimulationInput.vcxproj -> H:\project\CoalAssay\SQLDll\Debug\SimulationInput.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"H:\project\CoalAssay\SQLDll\Debug\SimulationInput.exe;#1" /manifest Debug\SimulationInput.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         正在删除文件“Debug\SimulationInput.unsuccessfulbuild”。
+         正在对“Debug\SimulationInput.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“H:\project\CoalAssay\SQLDll\SimulationInput\SimulationInput.vcxproj”(rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:01.31
